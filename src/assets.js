@@ -29,7 +29,7 @@ export function preload(decorCids) {
     files.push(`b/${t}_${r}.png`);
   }
   for (const r of ['race1', 'race2', 'race3', 'race4']) files.push(`u/${r}.png`, `u/${r}_w.png`);
-  for (const g of ['golem_none', 'golem_race1', 'golem_race2', 'golem_race3', 'octopus', 'scorpion', 'tentacle'])
+  for (const g of ['golem_none', 'golem_race1', 'golem_race2', 'golem_race3', 'octopus', 'scorpion', 'tentacle', 'turtle'])
     files.push(`boss/${g}.png`);
   for (const [cid, ext] of decorCids) files.push(`d/${cid}.${ext}`);
   let done = 0;

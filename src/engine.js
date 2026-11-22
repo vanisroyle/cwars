@@ -1,7 +1,7 @@
 // Core simulation: buildings, armies, combat, towers, crystals, spells, AI, boss.
 import { sfx } from './assets.js';
 import {
-  OWNER, UNITS, BUILDING_TYPES, HOUSE_REGEN, OVERCAP_DECAY, CRYSTAL_RATE,
+  OWNER, UNITS, BUILDING_TYPES, HOUSE_REGEN_SEC, SHRINE_PROFIT, CRYSTAL_FLAT_RATE, SEND_WAVE, SEND_INTERVAL,
   TOWER_DAMAGE_PER_POP, TOWER_MAX_HIT, AI_CIV_TINTS, AI_STATS,
   SPELLS, SPELL_POWER, spellCooldown, rankVal,
 } from './data.js';
@@ -32,8 +32,10 @@ export class Game {
     const lai = level.ai || { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 };
     for (let i = 1; i <= aiCount; i++) {
       const st = { ...AI_STATS };
-      st.attack *= diff * lai.attack / 1.8; st.defense *= diff * lai.defense / 1.8;
-      st.agility *= diff * lai.agility / 1.8; st.speed = Math.min(1.3, st.speed * diff * lai.speed / 1.8);
+      // Original normal mode dampens enemy stats: stat -> int + frac/1.7.
+      const damp = v => Math.floor(v) + (v - Math.floor(v)) / 1.7;
+      st.attack *= diff * damp(lai.attack) / 1.8; st.defense *= diff * damp(lai.defense) / 1.8;
+      st.agility *= diff * damp(lai.agility) / 1.8; st.speed = Math.min(1.3, st.speed * diff * damp(lai.speed) / 1.8);
       st.crystalInit = Math.min(st.crystalMax, Math.max(st.crystalInit, lai.crystalInit));
       this.civs.push({ id: i, color: AI_CIV_TINTS[(i - 1) % AI_CIV_TINTS.length], stats: st, crystals: st.crystalInit, cooldowns: {}, ai: true, aiTimer: 1 + i * 1.3, aiSpells: ['fireball', 'meteorite'] });
     }
@@ -42,7 +44,8 @@ export class Game {
     this.buildings = level.buildings.map((b, i) => ({
       id: i, x: b[0], y: b[1], type: BUILDING_TYPES[b[2]], typeKey: b[2],
       owner: b[3], pop: b[4] !== undefined ? b[4] : (b[3] === OWNER.NEUTRAL ? BUILDING_TYPES[b[2]].soft * 0.35 : BUILDING_TYPES[b[2]].soft * 0.7),
-      shieldT: 0, shieldBonus: 0, swampT: 0, fireT: 0,
+      cap: b[5] || BUILDING_TYPES[b[2]].soft, hard: Math.floor((b[5] || BUILDING_TYPES[b[2]].soft) * 1.5),
+      shieldT: 0, shieldBonus: 0, swampT: 0, fireT: 0, send: null,
     }));
 
     this.groups = [];      // {owner, unit, count, x, y, tx, ty, target(building|null), slow}
@@ -67,23 +70,30 @@ export class Game {
     return null;
   }
 
+  // Original sends half the garrison as a stream of small squads, not one blob.
   sendTroops(building, target, owner) {
-    const count = Math.floor(building.pop / 2);
-    if (count < 1) return null;
-    building.pop -= count;
-    const civ = this.civs[owner];
-    const unit = UNITS[building.type.unit];
-    const tx = target.x ?? target.x, ty = target.y ?? target.y;
-    // Stagger spawn point a bit so swarms from different buildings don't overlap fully.
-    const g = {
-      owner, unitKey: building.type.unit, count,
-      x: building.x + (Math.random() - .5) * 8, y: building.y + (Math.random() - .5) * 8,
-      tx, ty, target, slow: 1,
-      speed: unit.speed * civ.stats.speed,
-    };
-    this.groups.push(g);
+    const total = Math.floor(building.pop / 2);
+    if (total < 1) return null;
+    building.send = { left: total, target, owner, t: 0 };
     sfx.sendFor(this.raceOf(owner));
-    return g;
+    return building.send;
+  }
+
+  sendWave(building) {
+    const s = building.send;
+    const count = Math.min(SEND_WAVE, Math.floor(building.pop), s.left);
+    if (count <= 0) { building.send = null; return; }
+    s.left -= count;
+    building.pop -= count;
+    if (s.left <= 0) building.send = null;
+    const civ = this.civs[s.owner];
+    const unit = UNITS[building.type.unit];
+    this.groups.push({
+      owner: s.owner, unitKey: building.type.unit, count,
+      x: building.x + (Math.random() - .5) * 8, y: building.y + (Math.random() - .5) * 8,
+      tx: s.target.x, ty: s.target.y, target: s.target, slow: 1,
+      speed: unit.speed * civ.stats.speed,
+    });
   }
 
   defPower(building) {
@@ -98,7 +108,7 @@ export class Game {
     if (!b) return;
     if (b.owner === g.owner) {
       // Friendly: merge, capped at hard cap.
-      b.pop = Math.min(b.type.hard, b.pop + g.count * (g.unitKey === 'heavy' ? UNITS.heavy.worth : 1));
+      b.pop = Math.min(b.hard, b.pop + g.count * (g.unitKey === 'heavy' ? UNITS.heavy.worth : 1));
       return;
     }
     const atkCiv = this.civs[g.owner];
@@ -108,10 +118,15 @@ export class Game {
     const def = this.defPower(b);
     const ratio = atk / def; // defenders killed per attacker
     const attackersNeeded = b.pop / ratio;
+    // Original: each enemy killed pays +1 crystal into the attacking player's pool.
+    const killed = Math.min(b.pop, g.count * ratio);
+    if (g.owner === OWNER.PLAYER && killed >= 1) {
+      atkCiv.crystals = Math.min(atkCiv.stats.crystalMax, atkCiv.crystals + Math.floor(killed));
+    }
     if (g.count > attackersNeeded) {
       const survivors = g.count - attackersNeeded;
       b.owner = g.owner;
-      b.pop = Math.min(b.type.hard, Math.max(1, Math.round(survivors * (g.unitKey === 'heavy' ? UNITS.heavy.worth : 1))));
+      b.pop = Math.min(b.hard, Math.max(1, Math.round(survivors * (g.unitKey === 'heavy' ? UNITS.heavy.worth : 1))));
       b.shieldT = 0; // shield is lost... actually original keeps it; keeping simple: capture clears swamp, keeps shield
       b.swampT = 0;
       this.flash(b.x, b.y, '#fff');
@@ -274,7 +289,7 @@ export class Game {
     for (const m of senders) {
       if (force >= needed * 1.15) break;
       const g = this.sendTroops(m, target, civ.id);
-      if (g) force += g.count;
+      if (g) force += g.left;
     }
   }
 
@@ -286,19 +301,27 @@ export class Game {
     // Buildings: regen, decay, shield/swamp timers, tower fire.
     for (const b of this.buildings) {
       const civ = b.owner >= 0 ? this.civs[b.owner] : null;
-      if (b.owner >= 0 && b.type.kind === 'house' && b.pop < b.type.soft) {
-        b.pop = Math.min(b.type.soft, b.pop + b.type.soft * HOUSE_REGEN * civ.stats.agility * dt);
+      // Houses regen +1 troop per HOUSE_REGEN_SEC seconds (scaled by agility). No overcap decay.
+      if (b.owner >= 0 && b.type.kind === 'house' && b.pop < b.cap) {
+        b.pop = Math.min(b.cap, b.pop + (civ.stats.agility / HOUSE_REGEN_SEC[b.typeKey]) * dt);
       }
-      if (b.pop > b.type.soft) b.pop = Math.max(b.type.soft, b.pop - OVERCAP_DECAY * dt * (b.type.kind === 'house' ? 1 : 2));
+      // Streaming sends: spawn a wave of up to SEND_WAVE troops per interval.
+      if (b.send) {
+        b.send.t -= dt;
+        if (b.send.t <= 0) {
+          b.send.t = SEND_INTERVAL[b.type.kind] || 0.44;
+          this.sendWave(b);
+        }
+      }
       if (b.shieldT > 0) b.shieldT -= dt;
       if (b.swampT > 0) {
         b.swampT -= dt;
         b.pop = Math.max(1, b.pop - SPELL_POWER.swamp.drainPerSec * dt);
       }
-      // Crystals from shrines.
+      // Crystals from shrines: original pays (profit + garrison) per 2s tick.
       if (b.owner >= 0 && b.type.kind === 'shrine') {
         const c = this.civs[b.owner];
-        c.crystals = Math.min(c.stats.crystalMax, c.crystals + b.pop * CRYSTAL_RATE * (c.stats.crystalMax / 500) * dt);
+        c.crystals = Math.min(c.stats.crystalMax, c.crystals + (SHRINE_PROFIT[b.typeKey] + b.pop) / 2 * dt);
       }
       // Tower fire.
       if (b.owner >= 0 && b.type.kind === 'tower' && b.pop >= 1) {
@@ -314,8 +337,11 @@ export class Game {
       }
     }
 
-    // Cooldowns.
-    for (const civ of this.civs) for (const k in civ.cooldowns) if (civ.cooldowns[k] > 0) civ.cooldowns[k] -= dt;
+    // Cooldowns + flat crystal income (original pays a base 21 per 2s tick).
+    for (const civ of this.civs) {
+      civ.crystals = Math.min(civ.stats.crystalMax, civ.crystals + CRYSTAL_FLAT_RATE * dt);
+      for (const k in civ.cooldowns) if (civ.cooldowns[k] > 0) civ.cooldowns[k] -= dt;
+    }
 
     // Arrows.
     for (const a of this.arrows) {
@@ -339,7 +365,10 @@ export class Game {
         if (b.swampT > 0 && Math.hypot(g.x - b.x, g.y - b.y) <= SPELL_POWER.swamp.r + b.type.r) sp *= SPELL_POWER.swamp.slow;
       }
       if (d < 6) {
-        if (g.target) this.resolveArrival(g);
+        if (g.target === this.boss) {
+          // Troops reaching the boss head chip its health.
+          this.boss.hp -= g.count * this.civs[g.owner].stats.attack;
+        } else if (g.target) this.resolveArrival(g);
         g.done = true;
       } else {
         g.x += dx / d * sp * dt;
@@ -427,7 +456,7 @@ export class Game {
         boss.tx = t.x; boss.ty = t.y;
       }
       const dx = boss.tx - boss.x, dy = boss.ty - boss.y, d = Math.hypot(dx, dy);
-      if (d > 8) { boss.x += dx / d * boss.speed * dt; boss.y += dy / d * boss.speed * dt; }
+      if (d > 8 && boss.speed > 0) { boss.x += dx / d * boss.speed * dt; boss.y += dy / d * boss.speed * dt; }
       boss.hitT -= dt;
       // Crush troops it touches; troops also hurt it.
       for (const g of this.groups) {
@@ -466,7 +495,8 @@ export class Game {
     for (const g of this.groups) if (g.owner >= 0) alive.add(g.owner);
     // Golems cannot capture buildings, so they alone do not keep a civ alive.
     const playerAlive = alive.has(OWNER.PLAYER);
-    const enemiesAlive = [...alive].some(id => id !== OWNER.PLAYER);
+    // A living boss keeps the enemy side alive — original requires killing the head.
+    const enemiesAlive = [...alive].some(id => id !== OWNER.PLAYER) || (this.boss && this.boss.hp > 0);
     if (!playerAlive) { this.over = true; this.result = 'lose'; }
     else if (!enemiesAlive) { this.over = true; this.result = 'win'; }
   }

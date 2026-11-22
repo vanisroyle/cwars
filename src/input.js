@@ -64,7 +64,9 @@ export class Input {
     }
     if (!this.dragging) return;
     this.dragging = false;
-    const target = this.game.buildingAt(p.x, p.y, 12);
+    const boss = this.game.boss;
+    const target = this.game.buildingAt(p.x, p.y, 12)
+      || (boss && boss.hp > 0 && Math.hypot(p.x - boss.x, p.y - boss.y) <= boss.r + 14 ? boss : null);
     if (target && this.selected.size) {
       for (const b of this.selected) {
         if (b !== target) this.game.sendTroops(b, target, OWNER.PLAYER);
