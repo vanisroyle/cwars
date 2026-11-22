@@ -50,8 +50,8 @@ const SND = {
   lightningIntro: '271_LightningIntroSound.mp3', quake: '262_QuakeSound.mp3',
   twister: '256_TwisterSound.mp3', swamp: '259_SwampSound.mp3',
   hypnoses: '281_HypnoseSound.mp3', shield: '260_ShieldSound.mp3',
-  support: '273_SupportSound.mp3', golem1: '282_GolemSound_race1.mp3',
-  golem2: '283_GolemSound_race2.mp3', golem3: '284_GolemSound_race3.mp3',
+  support: '273_SupportSound.mp3', golem1: '284_GolemSound_race1.mp3',
+  golem2: '283_GolemSound_race2.mp3', golem3: '282_GolemSound_race3.mp3',
   monsterShoot: '265_MonsterShootSound1.mp3', monsterHit: '264_MonsterPawHitSound1.mp3',
   win: '291_CheerSound.mp3', lose: '290_DefeatSound.mp3',
   bgMusic: '263_BackgroundSound.mp3', menuMusic: '280_IntroMusic.mp3',
@@ -73,7 +73,7 @@ export const sfx = {
     } catch (e) { /* audio blocked */ }
   },
   playForSpell(spell, raceIdx = 1) {
-    if (spell === 'golem') { this.play(`golem${raceIdx}`); return; }
+    if (spell === 'golem') { this.play(`golem${Math.min(raceIdx, 3)}`); return; }
     const s = SPELL_SND[spell];
     if (s) this.play(s);
     if (spell === 'fireball' || spell === 'meteorite') setTimeout(() => this.play('fireHit', 0.45), 450);
