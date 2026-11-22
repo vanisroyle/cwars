@@ -319,11 +319,12 @@ export class Game {
     this.arrows = this.arrows.filter(a => a.t < a.life);
     this.groups = this.groups.filter(g => g.count > 0);
 
-    // Move groups.
+    // Move groups. Slow is recomputed every tick so spell slows expire cleanly.
     for (const g of this.groups) {
       const dx = g.tx - g.x, dy = g.ty - g.y;
       const d = Math.hypot(dx, dy);
       let sp = g.speed * g.slow;
+      g.slow = 1;
       // Swamp slowdown near swamped buildings.
       for (const b of this.buildings) {
         if (b.swampT > 0 && Math.hypot(g.x - b.x, g.y - b.y) <= SPELL_POWER.swamp.r + b.type.r) sp *= SPELL_POWER.swamp.slow;
