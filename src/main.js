@@ -39,11 +39,16 @@ function startLevel(idx) {
   const lv = { ...LEVELS[idx], index: idx };
   game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells);
   armedSpell = null;
-  input = new Input(canvas, game, (x, y) => {
-    if (!armedSpell) return;
-    if (game.cast(0, armedSpell, x, y)) { /* cast */ }
-    disarmSpell();
-  });
+  if (!input) {
+    input = new Input(canvas, game, (x, y) => {
+      if (!armedSpell || !game) return;
+      game.cast(0, armedSpell, x, y);
+      disarmSpell();
+    });
+  } else {
+    input.game = game;
+    input.disarmSpell();
+  }
   buildSpellbar();
   $('hud-level').textContent = `Level ${idx + 1} — ${LEVELS[idx].name}`;
   show(null);
