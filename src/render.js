@@ -1,96 +1,62 @@
 // Canvas renderer: terrain, buildings, armies, spells, boss.
 import { OWNER, NEUTRAL_COLOR } from './data.js';
+import { DECOR } from './decor.js';
+import { IMGS, buildingImg, unitImg, bossImg, decorImg } from './assets.js';
 
 const W = 960, H = 600;
-let terrain = null;
+let terrain = null, terrainLevel = -1;
 
-function buildTerrain() {
+function buildTerrain(levelIdx) {
+  terrainLevel = levelIdx;
   terrain = document.createElement('canvas');
   terrain.width = W; terrain.height = H;
   const c = terrain.getContext('2d');
-  // Parchment desert.
   const g = c.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#c9b078'); g.addColorStop(0.5, '#d4bc84'); g.addColorStop(1, '#c2a86e');
+  g.addColorStop(0, '#8aa35c'); g.addColorStop(0.5, '#9ab068'); g.addColorStop(1, '#7d9550');
   c.fillStyle = g; c.fillRect(0, 0, W, H);
-  // Mottled patches.
-  for (let i = 0; i < 260; i++) {
+  for (let i = 0; i < 200; i++) {
     const x = Math.random() * W, y = Math.random() * H, r = 8 + Math.random() * 40;
-    c.fillStyle = `rgba(${120 + Math.random() * 60 | 0},${95 + Math.random() * 45 | 0},50,${0.03 + Math.random() * 0.05})`;
+    c.fillStyle = `rgba(${80 + Math.random() * 60 | 0},${110 + Math.random() * 40 | 0},40,${0.03 + Math.random() * 0.05})`;
     c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
   }
-  // Nile-like river squiggle for flavor.
-  c.strokeStyle = 'rgba(70,110,140,0.35)';
-  c.lineWidth = 22; c.lineCap = 'round';
-  c.beginPath();
-  c.moveTo(-20, 80);
-  for (let x = 0; x <= W + 20; x += 40) c.lineTo(x, 80 + Math.sin(x / 90) * 26);
-  c.stroke();
-  // Vignette.
+  // Original stage decor (trees, ruins, grass) at extracted positions.
+  for (const [cid, x, y, sx, sy] of (DECOR[levelIdx] || [])) {
+    const img = decorImg(cid, IMGS[`d/${cid}.jpg`] ? 'jpg' : 'png');
+    if (!img || !img.width) continue;
+    const w = img.width * sx * 1.2, h = img.height * sy * 1.2;
+    c.drawImage(img, x - w / 2, y - h / 2, w, h);
+  }
   const v = c.createRadialGradient(W / 2, H / 2, H / 3, W / 2, H / 2, H);
-  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(40,20,0,0.35)');
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(30,30,0,0.28)');
   c.fillStyle = v; c.fillRect(0, 0, W, H);
 }
+
+export function resetTerrain() { terrain = null; terrainLevel = -1; }
 
 function ownerColor(owner, civs) {
   return owner < 0 ? NEUTRAL_COLOR : civs[owner].color;
 }
 
-function drawBuilding(c, b, civs, sel) {
+function drawBuilding(c, b, civs, sel, raceOf) {
   const r = b.type.r;
   const col = ownerColor(b.owner, civs);
-  // Selection ring.
   if (sel) {
     c.strokeStyle = '#fff'; c.lineWidth = 3;
     c.beginPath(); c.arc(b.x, b.y, r + 7, 0, 7); c.stroke();
   }
-  // Base disc.
-  c.fillStyle = 'rgba(60,40,15,0.35)';
-  c.beginPath(); c.ellipse(b.x, b.y + r * 0.8, r * 1.15, r * 0.45, 0, 0, 7); c.fill();
-  c.fillStyle = '#e6d3a0';
-  c.strokeStyle = col; c.lineWidth = 4;
-  c.beginPath(); c.arc(b.x, b.y, r, 0, 7); c.fill(); c.stroke();
-
-  const lv = b.type.level;
-  c.fillStyle = col;
-  c.strokeStyle = '#4a3010';
-  c.lineWidth = 1.5;
-  if (b.type.kind === 'house') {
-    // Stacked dwelling: base + level boxes.
-    const w = r * 1.1;
-    for (let i = 0; i < lv; i++) {
-      const bw = w * (1 - i * 0.14);
-      const by = b.y + r * 0.45 - i * (r * 0.32);
-      c.fillStyle = i % 2 ? '#d8c08a' : '#e6d3a0';
-      c.fillRect(b.x - bw / 2, by - r * 0.34, bw, r * 0.34);
-      c.strokeRect(b.x - bw / 2, by - r * 0.34, bw, r * 0.34);
-    }
-    c.fillStyle = col;
-    c.beginPath(); c.moveTo(b.x - w * 0.4, b.y + r * 0.45 - (lv - 1) * r * 0.32 - r * 0.34);
-    c.lineTo(b.x, b.y + r * 0.45 - lv * r * 0.32 - r * 0.44);
-    c.lineTo(b.x + w * 0.4, b.y + r * 0.45 - (lv - 1) * r * 0.32 - r * 0.34);
-    c.closePath(); c.fill(); c.stroke();
-  } else if (b.type.kind === 'shrine') {
-    // Obelisk.
-    const hgt = r * (1.1 + lv * 0.28);
-    c.fillStyle = '#d8c08a';
-    c.beginPath();
-    c.moveTo(b.x - r * 0.28, b.y + r * 0.55);
-    c.lineTo(b.x - r * 0.14, b.y + r * 0.55 - hgt);
-    c.lineTo(b.x + r * 0.14, b.y + r * 0.55 - hgt);
-    c.lineTo(b.x + r * 0.28, b.y + r * 0.55);
-    c.closePath(); c.fill(); c.stroke();
-    c.fillStyle = '#ffe066';
-    c.beginPath(); c.arc(b.x, b.y + r * 0.55 - hgt, 4 + lv, 0, 7); c.fill();
-  } else { // tower
-    const hgt = r * (1.0 + lv * 0.3);
-    c.fillStyle = '#c9b078';
-    c.fillRect(b.x - r * 0.42, b.y + r * 0.55 - hgt, r * 0.84, hgt);
-    c.strokeRect(b.x - r * 0.42, b.y + r * 0.55 - hgt, r * 0.84, hgt);
-    // Battlements.
-    c.fillStyle = col;
-    for (let i = -1; i <= 1; i++) {
-      c.fillRect(b.x + i * r * 0.32 - r * 0.11, b.y + r * 0.55 - hgt - r * 0.18, r * 0.22, r * 0.2);
-    }
+  const raceIdx = b.owner < 0 ? 0 : raceOf(b.owner);
+  const img = buildingImg(b.typeKey, raceIdx);
+  if (img && img.width) {
+    // Owner ring at the building base, then the extracted sprite (anchor: bottom-center of footprint).
+    c.fillStyle = col; c.globalAlpha = 0.55;
+    c.beginPath(); c.ellipse(b.x, b.y + r * 0.55, r * 1.1, r * 0.42, 0, 0, 7); c.fill();
+    c.globalAlpha = 1;
+    const s = (r * 2.9) / Math.max(img.width, img.height);
+    const w = img.width * s, h = img.height * s;
+    c.drawImage(img, b.x - w / 2, b.y + r * 0.75 - h, w, h);
+  } else {
+    c.fillStyle = '#e6d3a0'; c.strokeStyle = col; c.lineWidth = 4;
+    c.beginPath(); c.arc(b.x, b.y, r, 0, 7); c.fill(); c.stroke();
   }
 
   // Shield aura.
@@ -114,35 +80,35 @@ function drawBuilding(c, b, civs, sel) {
   c.fillStyle = '#fff'; c.fillText(txt, b.x, b.y - r - 8);
 }
 
-function drawGroup(c, g, civs) {
+function drawGroup(c, g, civs, raceOf) {
   const col = civs[g.owner].color;
-  const n = Math.min(34, Math.ceil(g.count));
+  const n = Math.min(30, Math.ceil(g.count));
   const spread = 8 + Math.min(16, Math.sqrt(g.count) * 2);
+  const img = unitImg(raceOf(g.owner), (g.x | 0) % 2 === 0);
+  const su = g.unitKey === 'heavy' ? 22 : g.unitKey === 'cavalry' ? 20 : 16;
   for (let i = 0; i < n; i++) {
-    const a = (i * 2.39996) + g.x; // golden-angle-ish deterministic scatter
+    const a = (i * 2.39996) + g.x; // deterministic scatter
     const rr = (i / n) * spread;
     const x = g.x + Math.cos(a) * rr, y = g.y + Math.sin(a) * rr * 0.7;
-    c.fillStyle = col;
-    c.strokeStyle = 'rgba(20,10,0,0.6)'; c.lineWidth = 1;
-    if (g.unitKey === 'cavalry') {
-      c.beginPath(); c.moveTo(x, y - 4); c.lineTo(x + 4, y + 3); c.lineTo(x - 4, y + 3); c.closePath(); c.fill(); c.stroke();
-    } else if (g.unitKey === 'heavy') {
-      c.fillRect(x - 3.5, y - 3.5, 7, 7); c.strokeRect(x - 3.5, y - 3.5, 7, 7);
+    if (img && img.width) {
+      const s = su / img.height, w = img.width * s, h = img.height * s;
+      c.drawImage(img, x - w / 2, y - h + 3, w, h);
     } else {
+      c.fillStyle = col; c.strokeStyle = 'rgba(20,10,0,0.6)'; c.lineWidth = 1;
       c.beginPath(); c.arc(x, y, 3, 0, 7); c.fill(); c.stroke();
     }
   }
-  // Count label.
   c.font = 'bold 12px Georgia'; c.textAlign = 'center';
   c.lineWidth = 3; c.strokeStyle = 'rgba(20,10,0,0.8)';
-  c.strokeText(String(Math.ceil(g.count)), g.x, g.y - spread - 6);
-  c.fillStyle = '#fff'; c.fillText(String(Math.ceil(g.count)), g.x, g.y - spread - 6);
+  c.strokeText(String(Math.ceil(g.count)), g.x, g.y - spread - 10);
+  c.fillStyle = '#fff'; c.fillText(String(Math.ceil(g.count)), g.x, g.y - spread - 10);
 }
 
 export function render(ctx, game, ui) {
-  if (!terrain) buildTerrain();
+  if (!terrain || terrainLevel !== game.levelIdx) buildTerrain(game.levelIdx);
   ctx.clearRect(0, 0, W, H);
   ctx.drawImage(terrain, 0, 0);
+  const raceOf = game.raceOf || ((o) => Math.min(o + 1, 4));
 
   // Hovered tower range.
   if (ui.hoverBuilding && ui.hoverBuilding.type.kind === 'tower' && ui.hoverBuilding.owner >= 0) {
@@ -161,7 +127,7 @@ export function render(ctx, game, ui) {
   }
 
   for (const b of game.buildings) {
-    drawBuilding(ctx, b, game.civs, ui.selected.has(b));
+    drawBuilding(ctx, b, game.civs, ui.selected.has(b), raceOf);
   }
 
   // Drag-selection line.
@@ -177,7 +143,7 @@ export function render(ctx, game, ui) {
     }
   }
 
-  for (const g of game.groups) drawGroup(ctx, g, game.civs);
+  for (const g of game.groups) drawGroup(ctx, g, game.civs, raceOf);
 
   // Arrows.
   for (const a of game.arrows) {
@@ -189,27 +155,29 @@ export function render(ctx, game, ui) {
 
   // Golems.
   for (const gl of game.golems) {
-    ctx.fillStyle = '#8a7a5e';
-    ctx.strokeStyle = game.civs[gl.owner].color; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(gl.x, gl.y, 13, 0, 7); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#5a4c34';
-    ctx.fillRect(gl.x - 5, gl.y - 5, 4, 4); ctx.fillRect(gl.x + 2, gl.y - 5, 4, 4);
+    const img = bossImg(`golem_race${raceOf(gl.owner)}`);
+    if (img && img.width) {
+      const h = 52, w = img.width * (h / img.height);
+      ctx.drawImage(img, gl.x - w / 2, gl.y - h * 0.7, w, h);
+    } else {
+      ctx.fillStyle = '#8a7a5e'; ctx.strokeStyle = game.civs[gl.owner].color; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(gl.x, gl.y, 13, 0, 7); ctx.fill(); ctx.stroke();
+    }
   }
 
   // Boss.
   if (game.boss && game.boss.hp > 0) {
     const b = game.boss;
-    ctx.fillStyle = '#4a6b3a';
-    ctx.strokeStyle = '#2a4a1a'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.stroke();
-    // Shell pattern.
-    ctx.strokeStyle = 'rgba(30,50,20,0.6)'; ctx.lineWidth = 2;
-    for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r * i / 3.4, 0, 7); ctx.stroke(); }
-    ctx.fillStyle = '#ffdf5a';
-    ctx.beginPath(); ctx.arc(b.x - 8, b.y - 6, 3, 0, 7); ctx.arc(b.x + 8, b.y - 6, 3, 0, 7); ctx.fill();
-    // HP bar.
-    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(b.x - 40, b.y - b.r - 16, 80, 7);
-    ctx.fillStyle = '#7c4'; ctx.fillRect(b.x - 39, b.y - b.r - 15, 78 * Math.max(0, b.hp / b.maxHp), 5);
+    const img = bossImg(b.kind || 'octopus');
+    if (img && img.width) {
+      const h = b.r * 4.2, w = img.width * (h / img.height);
+      ctx.drawImage(img, b.x - w / 2, b.y - h * 0.72, w, h);
+    } else {
+      ctx.fillStyle = '#4a6b3a'; ctx.strokeStyle = '#2a4a1a'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(b.x - 40, b.y - b.r - 20, 80, 7);
+    ctx.fillStyle = '#7c4'; ctx.fillRect(b.x - 39, b.y - b.r - 19, 78 * Math.max(0, b.hp / b.maxHp), 5);
   }
 
   // Effects.

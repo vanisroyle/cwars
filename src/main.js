@@ -1,8 +1,10 @@
 // App wiring: screens, save data, HUD, game loop.
 import { CIVS, LEVELS, SPELLS, SPELL_ORDER, SPELL_POWER, STAT_DEFS, STAT_MAX, SPELL_MAX_RANK, UPGRADE_COST, rankVal } from './data.js';
 import { Game, effectiveStats } from './engine.js';
-import { render } from './render.js';
+import { render, resetTerrain } from './render.js';
 import { Input } from './input.js';
+import { preload, sfx, RACE_INDEX } from './assets.js';
+import { DECOR } from './decor.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
@@ -37,8 +39,13 @@ function playerStats() { return effectiveStats(CIVS[save.civ].stats, save.stats)
 function startLevel(idx) {
   levelIndex = idx;
   const lv = { ...LEVELS[idx], index: idx };
-  game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells);
+  const playerRace = RACE_INDEX[save.civ] || 1;
+  const others = [1, 2, 3].filter(r => r !== playerRace);
+  const raceOf = (o) => (o === 0 ? playerRace : (o <= 2 ? others[o - 1] : 4));
+  game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells, raceOf);
   armedSpell = null;
+  resetTerrain();
+  sfx.music('bgMusic');
   if (!input) {
     input = new Input(canvas, game, (x, y) => {
       if (!armedSpell || !game) return;
@@ -110,7 +117,7 @@ function refreshSpellbar() {
 }
 
 // ---------- Menus ----------
-function showTitle() { show('title'); game = null; }
+function showTitle() { show('title'); game = null; sfx.music('menuMusic'); }
 
 function buildCivCards() {
   const wrap = $('civ-cards');
@@ -193,6 +200,7 @@ function buildUpgrades() {
 
 // ---------- Result ----------
 function showResult(win) {
+  sfx.play(win ? 'win' : 'lose', 0.7);
   const lv = LEVELS[levelIndex];
   $('result-title').textContent = win ? 'Victory!' : 'Defeat';
   if (win) {
@@ -250,5 +258,10 @@ function frame(t) {
 // Give the player a couple of starter spells so the mechanic is discoverable.
 if (!save.spells.fireball) { save.spells.fireball = 1; save.spells.shield = 1; persist(); }
 
-showTitle();
+// Preload extracted sprites, then boot the menus.
+const decorFiles = [];
+for (const k in DECOR) for (const [cid] of DECOR[k]) {
+  decorFiles.push([cid, 'png'], [cid, 'jpg']); // one of the two 404s harmlessly
+}
+preload(decorFiles).then(() => { showTitle(); });
 requestAnimationFrame(frame);

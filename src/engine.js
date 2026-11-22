@@ -1,4 +1,5 @@
 // Core simulation: buildings, armies, combat, towers, crystals, spells, AI, boss.
+import { sfx } from './assets.js';
 import {
   OWNER, UNITS, BUILDING_TYPES, HOUSE_REGEN, OVERCAP_DECAY, CRYSTAL_RATE,
   TOWER_DAMAGE_PER_POP, TOWER_MAX_HIT, AI_CIV_TINTS, AI_STATS,
@@ -15,8 +16,10 @@ export function effectiveStats(civBase, statRanks) {
 }
 
 export class Game {
-  constructor(level, playerCivStats, playerStatRanks, playerSpellRanks) {
+  constructor(level, playerCivStats, playerStatRanks, playerSpellRanks, raceOf) {
     this.level = level;
+    this.levelIdx = level.index;
+    this.raceOf = raceOf || ((o) => Math.min(o + 1, 4));
     this.time = 0;
     this.over = false;
     this.result = null; // 'win' | 'lose'
@@ -26,9 +29,12 @@ export class Game {
     this.civs.push({ id: 0, color: playerCivStats.color, stats: effectiveStats(playerCivStats.stats, playerStatRanks), crystals: 0, spellRanks: playerSpellRanks, cooldowns: {}, ai: false });
     const aiCount = Math.max(...level.buildings.map(b => b[3])) || 0;
     const diff = 1 + (level.index || 0) * 0.06;
+    const lai = level.ai || { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 };
     for (let i = 1; i <= aiCount; i++) {
       const st = { ...AI_STATS };
-      st.attack *= diff; st.defense *= diff; st.agility *= diff; st.speed = Math.min(1.3, st.speed * diff);
+      st.attack *= diff * lai.attack / 1.8; st.defense *= diff * lai.defense / 1.8;
+      st.agility *= diff * lai.agility / 1.8; st.speed = Math.min(1.3, st.speed * diff * lai.speed / 1.8);
+      st.crystalInit = Math.min(st.crystalMax, Math.max(st.crystalInit, lai.crystalInit));
       this.civs.push({ id: i, color: AI_CIV_TINTS[(i - 1) % AI_CIV_TINTS.length], stats: st, crystals: st.crystalInit, cooldowns: {}, ai: true, aiTimer: 1 + i * 1.3, aiSpells: ['fireball', 'meteorite'] });
     }
     this.civs[0].crystals = this.civs[0].stats.crystalInit;
@@ -47,7 +53,7 @@ export class Game {
 
     this.boss = null;
     if (level.boss) {
-      this.boss = { x: level.boss.x, y: level.boss.y, hp: level.boss.hp, maxHp: level.boss.hp, speed: level.boss.speed, r: level.boss.radius, dmg: level.boss.dmg, tx: W / 2, ty: H / 2, retarget: 0, hitT: 0 };
+      this.boss = { x: level.boss.x, y: level.boss.y, hp: level.boss.hp, maxHp: level.boss.hp, speed: level.boss.speed, r: level.boss.radius, dmg: level.boss.dmg, kind: level.boss.kind || 'octopus', tx: W / 2, ty: H / 2, retarget: 0, hitT: 0 };
     }
     this.events = []; // {msg} for renderer flashes
   }
@@ -76,6 +82,7 @@ export class Game {
       speed: unit.speed * civ.stats.speed,
     };
     this.groups.push(g);
+    sfx.sendFor(this.raceOf(owner));
     return g;
   }
 
@@ -134,6 +141,7 @@ export class Game {
     const rank = chk.rank;
     civ.crystals -= SPELLS[key].cost;
     civ.cooldowns[key] = spellCooldown(key, rank);
+    sfx.playForSpell(key, this.raceOf(owner));
     const P = SPELL_POWER[key];
     switch (key) {
       case 'fireball': case 'meteorite': {
@@ -300,6 +308,7 @@ export class Game {
           const tgt = this.groups.find(g => g.owner !== b.owner && Math.hypot(g.x - b.x, g.y - b.y) <= b.type.range);
           if (tgt) {
             this.arrows.push({ x: b.x, y: b.y - b.type.r, tx: tgt.x, ty: tgt.y, t: 0, life: 0.22, dmg: Math.min(TOWER_MAX_HIT, b.pop * TOWER_DAMAGE_PER_POP * this.civs[b.owner].stats.attack), target: tgt });
+            sfx.play('towerShoot', 0.18);
           }
         }
       }
