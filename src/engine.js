@@ -384,8 +384,10 @@ export class Game {
 
     // Golems: walk to nearest enemy building, smash things in reach.
     for (const gl of this.golems) {
-      if (!gl.target || gl.target.owner === gl.owner) {
-        gl.target = this.buildings.filter(b => b.owner !== gl.owner)
+      if (!gl.target || gl.target.owner === gl.owner || gl.target.pop <= 0) {
+        const pool = this.buildings.filter(b => b.owner >= 0 && b.owner !== gl.owner);
+        const fallback = this.buildings.filter(b => b.owner === -1 && b.pop > 0);
+        gl.target = (pool.length ? pool : fallback)
           .sort((a, b) => Math.hypot(a.x - gl.x, a.y - gl.y) - Math.hypot(b.x - gl.x, b.y - gl.y))[0]
           || null;
       }
