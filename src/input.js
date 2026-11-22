@@ -58,7 +58,8 @@ export class Input {
     this.mouse = p;
     if (e.button !== 0) return;
     if (this.spellTarget) {
-      this.onCast(p.x, p.y);
+      // Only casts land on the canvas; clicks on the spell bar cancel via its own handler.
+      if (e.target === this.canvas) this.onCast(p.x, p.y);
       return;
     }
     if (!this.dragging) return;
