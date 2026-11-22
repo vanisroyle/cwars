@@ -260,8 +260,6 @@ if (!save.spells.fireball) { save.spells.fireball = 1; save.spells.shield = 1; p
 
 // Preload extracted sprites, then boot the menus.
 const decorFiles = [];
-for (const k in DECOR) for (const [cid] of DECOR[k]) {
-  decorFiles.push([cid, 'png'], [cid, 'jpg']); // one of the two 404s harmlessly
-}
+for (const k in DECOR) for (const [cid] of DECOR[k]) decorFiles.push([cid, 'png']);
 preload(decorFiles).then(() => { showTitle(); });
 requestAnimationFrame(frame);
