@@ -448,11 +448,11 @@ export class Game {
       }
     }
 
-    // Win/lose: a civ is alive if it owns a building or still has troops/golems marching.
+    // Win/lose: a civ is alive if it owns a building or still has troops marching.
     const alive = new Set();
     for (const b of this.buildings) if (b.owner >= 0) alive.add(b.owner);
     for (const g of this.groups) if (g.owner >= 0) alive.add(g.owner);
-    for (const gl of this.golems) alive.add(gl.owner);
+    // Golems cannot capture buildings, so they alone do not keep a civ alive.
     const playerAlive = alive.has(OWNER.PLAYER);
     const enemiesAlive = [...alive].some(id => id !== OWNER.PLAYER);
     if (!playerAlive) { this.over = true; this.result = 'lose'; }
