@@ -61,7 +61,7 @@ export const CIVS = {
 
 // AI opponents borrow these palettes/stat tweaks.
 export const AI_CIV_TINTS = ['#c23a2a', '#7a3ac2', '#2a8ac2', '#c2722a'];
-export const AI_STATS = { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 80, crystalMax: 500 };
+export const AI_STATS = { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 80, crystalMax: 700 };
 
 // Spells — rank 1..7 scales power; cost is crystal energy.
 export const SPELLS = {
