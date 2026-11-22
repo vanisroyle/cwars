@@ -126,6 +126,7 @@ export class Game {
     if (g.count > attackersNeeded) {
       const survivors = g.count - attackersNeeded;
       b.owner = g.owner;
+      b.send = null; // pending send order dies with the old owner
       b.pop = Math.min(b.hard, Math.max(1, Math.round(survivors * (g.unitKey === 'heavy' ? UNITS.heavy.worth : 1))));
       b.shieldT = 0; // shield is lost... actually original keeps it; keeping simple: capture clears swamp, keeps shield
       b.swampT = 0;
