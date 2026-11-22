@@ -11,14 +11,9 @@ function buildTerrain(levelIdx) {
   terrain = document.createElement('canvas');
   terrain.width = W; terrain.height = H;
   const c = terrain.getContext('2d');
-  const g = c.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, '#8aa35c'); g.addColorStop(0.5, '#9ab068'); g.addColorStop(1, '#7d9550');
-  c.fillStyle = g; c.fillRect(0, 0, W, H);
-  for (let i = 0; i < 200; i++) {
-    const x = Math.random() * W, y = Math.random() * H, r = 8 + Math.random() * 40;
-    c.fillStyle = `rgba(${80 + Math.random() * 60 | 0},${110 + Math.random() * 40 | 0},40,${0.03 + Math.random() * 0.05})`;
-    c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
-  }
+  // Original field backdrop is plain white.
+  c.fillStyle = '#fdfcfa';
+  c.fillRect(0, 0, W, H);
   // Original stage decor (trees, ruins, grass) at extracted positions.
   for (const [cid, x, y, sx, sy] of (DECOR[levelIdx] || [])) {
     const img = decorImg(cid, IMGS[`d/${cid}.jpg`] ? 'jpg' : 'png');
@@ -27,7 +22,7 @@ function buildTerrain(levelIdx) {
     c.drawImage(img, x - w / 2, y - h / 2, w, h);
   }
   const v = c.createRadialGradient(W / 2, H / 2, H / 3, W / 2, H / 2, H);
-  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(30,30,0,0.28)');
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(60,60,60,0.12)');
   c.fillStyle = v; c.fillRect(0, 0, W, H);
 }
 
@@ -47,10 +42,6 @@ function drawBuilding(c, b, civs, sel, raceOf) {
   const raceIdx = b.owner < 0 ? 0 : raceOf(b.owner);
   const img = buildingImg(b.typeKey, raceIdx);
   if (img && img.width) {
-    // Owner ring at the building base, then the extracted sprite (anchor: bottom-center of footprint).
-    c.fillStyle = col; c.globalAlpha = 0.55;
-    c.beginPath(); c.ellipse(b.x, b.y + r * 0.55, r * 1.1, r * 0.42, 0, 0, 7); c.fill();
-    c.globalAlpha = 1;
     const s = (r * 2.9) / Math.max(img.width, img.height);
     const w = img.width * s, h = img.height * s;
     c.drawImage(img, b.x - w / 2, b.y + r * 0.75 - h, w, h);
@@ -71,13 +62,22 @@ function drawBuilding(c, b, civs, sel, raceOf) {
   }
   // Tower range hint on hover handled by input layer.
 
-  // Population number.
-  c.font = 'bold 15px Georgia';
-  c.textAlign = 'center';
-  c.lineWidth = 3; c.strokeStyle = 'rgba(30,18,5,0.8)';
+  // Original-style label: white pill, owner-colored flag, dark pop number.
   const txt = String(Math.floor(b.pop));
-  c.strokeText(txt, b.x, b.y - r - 8);
-  c.fillStyle = '#fff'; c.fillText(txt, b.x, b.y - r - 8);
+  c.font = 'bold 11px Arial';
+  const tw = c.measureText(txt).width;
+  const pw = tw + 24, ph = 15;
+  const lx = b.x - pw / 2, ly = b.y - r - 20;
+  c.fillStyle = 'rgba(255,255,255,0.92)';
+  c.strokeStyle = 'rgba(0,0,0,0.4)'; c.lineWidth = 1;
+  c.beginPath(); c.roundRect(lx, ly, pw, ph, 3); c.fill(); c.stroke();
+  // Flag: pole + pennant in owner color.
+  const fx = lx + 5, fy = ly + 2;
+  c.strokeStyle = '#555'; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx, fy + 11); c.stroke();
+  c.fillStyle = b.owner < 0 ? '#bbb' : col;
+  c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + 9, fy + 3); c.lineTo(fx, fy + 6); c.closePath(); c.fill();
+  c.fillStyle = '#222'; c.textAlign = 'left';
+  c.fillText(txt, lx + 17, ly + 12);
 }
 
 function drawGroup(c, g, civs, raceOf) {

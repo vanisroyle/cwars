@@ -71,8 +71,17 @@ function buildSpellbar() {
     const el = document.createElement('div');
     el.className = 'spell-slot' + (rank < 1 ? ' locked' : '');
     el.dataset.spell = key;
-    el.innerHTML = `<span class="icon">${rank < 1 ? '🔒' : s.icon}</span><span class="name">${s.name}</span><span class="cost">${rank < 1 ? 'R?' : s.cost}</span>`;
+    el.innerHTML = `<img class="icon" src="assets/img/ui/${key}.png" draggable="false">`;
     el.title = `${s.name} — ${s.desc} (${s.cost} energy)`;
+    el.addEventListener('mouseenter', () => {
+      if (rank < 1 || !game) return;
+      $('spell-info').textContent = `${s.name.toUpperCase()} (${rank}) ${s.cost}`;
+      $('spell-info').classList.remove('hidden');
+    });
+    el.addEventListener('mouseleave', () => {
+      if (armedSpell) return;
+      $('spell-info').classList.add('hidden');
+    });
     el.addEventListener('click', () => {
       if ((save.spells[key] || 0) < 1 || !game || game.over) return;
       if (armedSpell === key) { disarmSpell(); return; }
@@ -82,8 +91,8 @@ function buildSpellbar() {
       const P = SPELL_POWER[key];
       const r = key === 'hypnoses' ? rankVal(P.r[0], P.r[1], chk.rank) : (P.r || 40);
       input.armSpell(r);
-      $('spell-hint').textContent = `Click the map to cast ${s.name}`;
-      $('spell-hint').classList.remove('hidden');
+      $('spell-info').textContent = `${s.name.toUpperCase()} (${chk.rank}) ${s.cost}`;
+      $('spell-info').classList.remove('hidden');
       refreshSpellbar();
     });
     bar.appendChild(el);
@@ -93,14 +102,19 @@ function buildSpellbar() {
 function disarmSpell() {
   armedSpell = null;
   input?.disarmSpell();
-  $('spell-hint').classList.add('hidden');
+  $('spell-info').classList.add('hidden');
   refreshSpellbar();
 }
 
 function refreshSpellbar() {
   if (!game) return;
   const civ = game.civs[0];
-  $('hud-crystals').textContent = `◆ ${Math.floor(civ.crystals)} / ${Math.floor(civ.stats.crystalMax)}`;
+  $('hud-crystals').textContent = `✦ ${Math.floor(civ.crystals)}`;
+  if (armedSpell) {
+    const s = SPELLS[armedSpell];
+    const rank = save.spells[armedSpell] || 0;
+    $('spell-info').textContent = `${s.name.toUpperCase()} (${rank}) ${s.cost}`;
+  }
   for (const el of document.querySelectorAll('.spell-slot')) {
     const key = el.dataset.spell;
     const rank = save.spells[key] || 0;

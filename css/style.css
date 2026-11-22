@@ -150,44 +150,60 @@ button.big { font-size: 22px; padding: 12px 40px; }
   align-items: center;
 }
 #hud-crystals {
-  font-size: 18px;
-  color: #e8f4ff;
-  text-shadow: 0 0 6px #36c, 0 1px 2px #000;
+  font-size: 15px;
+  color: #222;
   font-weight: bold;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.35);
+  border-radius: 8px;
+  padding: 2px 10px;
 }
-#hud-level { color: #f5e6c0; text-shadow: 0 1px 2px #000; font-size: 15px; }
-#btn-pause { pointer-events: auto; font-size: 14px; padding: 4px 12px; }
+#hud-level { color: #444; font-size: 13px; font-weight: bold; }
+#btn-pause {
+  pointer-events: auto; font-size: 0; width: 44px; height: 32px;
+  border: none; border-radius: 0; box-shadow: none;
+  background: url('../assets/img/ui/menubtn.png') center/contain no-repeat;
+}
+#btn-pause:hover { filter: brightness(1.1); }
 
 #spellbar {
   position: absolute;
   bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 12px;
   display: flex;
-  gap: 6px;
+  gap: 4px;
   pointer-events: auto;
 }
+#spell-info {
+  position: absolute;
+  bottom: 64px;
+  right: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #222;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,0,0,0.35);
+  border-radius: 8px;
+  padding: 1px 8px;
+  pointer-events: none;
+}
 .spell-slot {
-  width: 52px;
-  height: 58px;
-  border: 2px solid #4a2d0c;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #3a2a14, #241708);
+  width: 44px;
+  height: 44px;
   position: relative;
   cursor: pointer;
   text-align: center;
-  overflow: hidden;
 }
-.spell-slot .icon { font-size: 22px; line-height: 30px; display: block; margin-top: 4px; }
-.spell-slot .cost { font-size: 10px; color: #9ec5ff; }
-.spell-slot .name { font-size: 8px; color: #cbb; display: block; }
-.spell-slot.selected { border-color: #ffd24a; box-shadow: 0 0 10px #ffd24a; }
+.spell-slot .icon { width: 44px; height: 44px; display: block; }
+.spell-slot .cost, .spell-slot .name { display: none; }
+.spell-slot.selected .icon { filter: drop-shadow(0 0 5px #ffd24a) brightness(1.15); }
 .spell-slot .cool {
   position: absolute; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(0,0,0,0.55);
+  border-radius: 0 0 22px 22px;
 }
-.spell-slot.unaffordable .icon, .spell-slot.unaffordable .cost { opacity: 0.35; }
-.spell-slot.locked { opacity: 0.3; cursor: default; }
+.spell-slot.unaffordable .icon { opacity: 0.45; filter: grayscale(0.5); }
+.spell-slot.locked .icon { opacity: 0.35; filter: grayscale(1); cursor: default; }
 
 #spell-hint {
   position: absolute;
