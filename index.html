@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Civilizations Wars</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <canvas id="game-canvas" width="960" height="600"></canvas>
+
+  <!-- In-game HUD -->
+  <div id="hud" class="hidden">
+    <div id="hud-top">
+      <span id="hud-crystals"></span>
+      <span id="hud-level"></span>
+      <button id="btn-pause" title="Pause">II</button>
+    </div>
+    <div id="spellbar"></div>
+    <div id="spell-hint" class="hidden"></div>
+  </div>
+
+  <!-- Screens -->
+  <div id="screen-title" class="screen">
+    <div class="panel">
+      <h1>Civilizations Wars</h1>
+      <p class="tagline">Conquer every building. Rule the ancient world.</p>
+      <div class="menu-buttons">
+        <button id="btn-play" class="big">Play</button>
+        <button id="btn-upgrades">Upgrades</button>
+        <button id="btn-help">How to Play</button>
+      </div>
+      <p class="footnote">HTML5 remake of the classic Flash RTS. No ads, no plugins.</p>
+    </div>
+  </div>
+
+  <div id="screen-civ" class="screen hidden">
+    <div class="panel wide">
+      <h2>Choose your Civilization</h2>
+      <div id="civ-cards"></div>
+      <div class="menu-buttons"><button id="btn-civ-back">Back</button></div>
+    </div>
+  </div>
+
+  <div id="screen-levels" class="screen hidden">
+    <div class="panel wide">
+      <h2 id="levels-title">Campaign</h2>
+      <div id="level-grid"></div>
+      <div class="menu-buttons"><button id="btn-levels-back">Back</button></div>
+    </div>
+  </div>
+
+  <div id="screen-upgrades" class="screen hidden">
+    <div class="panel wide">
+      <h2>Upgrades <span id="xp-balance" class="xp"></span></h2>
+      <div class="upgrade-cols">
+        <div>
+          <h3>Stats</h3>
+          <div id="stat-upgrades"></div>
+        </div>
+        <div>
+          <h3>Spells</h3>
+          <div id="spell-upgrades"></div>
+        </div>
+      </div>
+      <div class="menu-buttons"><button id="btn-upg-back">Back</button></div>
+    </div>
+  </div>
+
+  <div id="screen-help" class="screen hidden">
+    <div class="panel wide">
+      <h2>How to Play</h2>
+      <div class="help-text">
+        <p><b>Goal:</b> capture every building on the map before your enemies do.</p>
+        <p><b>Send troops:</b> press the mouse on one of your buildings, drag over more of your buildings to add them to the order, then release on the target. Each building sends half of its garrison.</p>
+        <p><b>Houses</b> grow population over time (up to their soft cap). <b>Shrines</b> generate crystal energy for spells and send fast cavalry. <b>Towers</b> shoot arrows at passing enemies and send heavy infantry worth two defenders each.</p>
+        <p><b>Combat:</b> when troops reach an enemy building they fight until one side is gone. Bigger armies and better Attack/Defense stats win.</p>
+        <p><b>Spells:</b> click a spell icon, then click the map. Spells cost crystal energy — capture shrines to earn it faster.</p>
+        <p><b>Upgrades:</b> victories earn XP. Spend it on stats and stronger spells between battles.</p>
+      </div>
+      <div class="menu-buttons"><button id="btn-help-back">Back</button></div>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen hidden">
+    <div class="panel">
+      <h2 id="result-title"></h2>
+      <p id="result-detail"></p>
+      <div class="menu-buttons">
+        <button id="btn-result-next" class="big"></button>
+        <button id="btn-result-retry">Retry</button>
+        <button id="btn-result-menu">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-pause" class="screen hidden">
+    <div class="panel">
+      <h2>Paused</h2>
+      <div class="menu-buttons">
+        <button id="btn-resume" class="big">Resume</button>
+        <button id="btn-quit">Quit to Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
