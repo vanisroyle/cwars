@@ -34,7 +34,7 @@ export class Game {
       // Original normal mode dampens enemy stats: stat -> int + frac/1.7.
       const damp = v => Math.floor(v) + (v - Math.floor(v)) / 1.7;
       st.attack *= damp(lai.attack); st.defense *= damp(lai.defense);
-      st.agility *= damp(lai.agility); st.speed = Math.min(1.3, st.speed * damp(lai.speed));
+      st.agility *= damp(lai.agility); st.speed *= damp(lai.speed);
       st.crystalInit = Math.min(st.crystalMax, lai.crystalInit);
       this.civs.push({ id: i, color: AI_CIV_TINTS[(i - 1) % AI_CIV_TINTS.length], stats: st, crystals: st.crystalInit, cooldowns: {}, ai: true, aiTimer: 1 + i * 1.3, aiSpells: ['fireball', 'meteorite'] });
     }
