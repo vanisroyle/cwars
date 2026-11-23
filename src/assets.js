@@ -31,6 +31,9 @@ export function preload(decorCids) {
   for (const r of ['race1', 'race2', 'race3', 'race4']) files.push(`u/${r}.png`, `u/${r}_w.png`);
   for (const g of ['golem_none', 'golem_race1', 'golem_race2', 'golem_race3', 'octopus', 'scorpion', 'tentacle', 'turtle'])
     files.push(`boss/${g}.png`);
+  for (const g of ['g1', 'g2', 'g3', 'g4']) files.push(`terrain/${g}.jpg`);
+  for (const o of ['o2711', 'o2720', 'o2722', 'o2733', 'o2735', 'o2741', 'o2743', 'river1', 'river2'])
+    files.push(`terrain/${o}.png`);
   for (const [cid, ext] of decorCids) files.push(`d/${cid}.${ext}`);
   let done = 0;
   return Promise.all(files.map((f) => new Promise((res) => {

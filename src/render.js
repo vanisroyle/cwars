@@ -1,9 +1,10 @@
 // Canvas renderer: terrain, buildings, armies, spells, boss.
 import { OWNER, NEUTRAL_COLOR } from './data.js';
-import { DECOR } from './decor.js';
+import { DECOR, DBND, TERRAIN } from './decor.js';
 import { IMGS, buildingImg, unitImg, bossImg, decorImg } from './assets.js';
 
 const W = 960, H = 600;
+const K = 1.2; // stage 800x500 -> canvas 960x600
 let terrain = null, terrainLevel = -1;
 
 function buildTerrain(levelIdx) {
@@ -11,19 +12,35 @@ function buildTerrain(levelIdx) {
   terrain = document.createElement('canvas');
   terrain.width = W; terrain.height = H;
   const c = terrain.getContext('2d');
-  // Original field backdrop is plain white.
-  c.fillStyle = '#fdfcfa';
-  c.fillRect(0, 0, W, H);
+  // Original ground bitmap covering the whole field.
+  const g = IMGS[`terrain/${TERRAIN.ground[levelIdx] || 'g1'}.jpg`];
+  if (g && g.width) c.drawImage(g, 0, 0, W, H);
+  else { c.fillStyle = '#fdfcfa'; c.fillRect(0, 0, W, H); }
+  // Per-level overlay art (rivers, ruins, stains) under the warstage.
+  for (const [key, px, py, bx, by, bw, bh, flip] of (TERRAIN.overlay[levelIdx] || [])) {
+    const img = IMGS[`terrain/${key}.png`];
+    if (!img || !img.width) continue;
+    c.save();
+    c.translate(px * K, py * K);
+    if (flip) c.scale(-1, 1);
+    c.drawImage(img, bx * K, by * K, bw * K, bh * K);
+    c.restore();
+  }
   // Original stage decor (trees, ruins, grass) at extracted positions.
   for (const [cid, x, y, sx, sy] of (DECOR[levelIdx] || [])) {
     const img = decorImg(cid, IMGS[`d/${cid}.jpg`] ? 'jpg' : 'png');
     if (!img || !img.width) continue;
-    const w = img.width * sx * 1.2, h = img.height * sy * 1.2;
-    c.drawImage(img, x - w / 2, y - h / 2, w, h);
+    const b = DBND[cid];
+    c.save();
+    c.translate(x, y);
+    c.scale(sx, sy);
+    if (b) c.drawImage(img, b[0] * K, b[1] * K, b[2] * K, b[3] * K);
+    else {
+      const w = img.width * K, h = img.height * K;
+      c.drawImage(img, -w / 2, -h / 2, w, h);
+    }
+    c.restore();
   }
-  const v = c.createRadialGradient(W / 2, H / 2, H / 3, W / 2, H / 2, H);
-  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(60,60,60,0.12)');
-  c.fillStyle = v; c.fillRect(0, 0, W, H);
 }
 
 export function resetTerrain() { terrain = null; terrainLevel = -1; }
