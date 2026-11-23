@@ -68,7 +68,7 @@ function startLevel(idx) {
     input.disarmSpell();
   }
   buildSpellbar();
-  $('hud-level').textContent = `Level ${idx + 1} — ${LEVELS[idx].name}`;
+  $('hud-level').textContent = LEVELS[idx].name;
   show(null);
 }
 

@@ -144,7 +144,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 1', xp: 60,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 },
     buildings: [
       [787, 456, 'house2', -1, 10],
       [754, 519, 'house1', 1, 5],
@@ -178,7 +178,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 2', xp: 70,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 20 },
     buildings: [
       [512, 556, 'house3', 0, 60],
       [120, 118, 'house2', -1, 10],
@@ -205,7 +205,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 3', xp: 80,
-    ai: { attack: 1.2, defense: 1.2, agility: 1.1, speed: 1.2, crystalInit: 48 },
+    ai: { attack: 1.2, defense: 1.2, agility: 1.1, speed: 1.2, crystalInit: 20 },
     buildings: [
       [124, 126, 'house3', -1, 30],
       [217, 442, 'shrine1', -1, 5],
@@ -236,7 +236,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 4', xp: 90,
-    ai: { attack: 1.1, defense: 1.2, agility: 1.0, speed: 1.0, crystalInit: 480 },
+    ai: { attack: 1.1, defense: 1.2, agility: 1.0, speed: 1.0, crystalInit: 200 },
     buildings: [
       [882, 206, 'house3', 0, 60],
       [140, 192, 'house2', -1, 10],
@@ -255,7 +255,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 5', xp: 100,
-    ai: { attack: 1.0, defense: 1.1, agility: 1.0, speed: 1.0, crystalInit: 480 },
+    ai: { attack: 1.0, defense: 1.1, agility: 1.0, speed: 1.0, crystalInit: 200 },
     buildings: [
       [506, 145, 'tower1', -1, 5],
       [876, 114, 'house3', 0, 60],
@@ -288,7 +288,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 6', xp: 110,
-    ai: { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 480 },
+    ai: { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 200 },
     buildings: [
       [884, 128, 'house3', 0, 60],
       [116, 516, 'house3', 1, 60],
@@ -313,7 +313,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 7', xp: 120,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 },
     buildings: [
       [421, 529, 'tower3', -1, 25],
       [528, 333, 'house3', -1, 60],
@@ -346,7 +346,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 8', xp: 130,
-    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.2, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.2, crystalInit: 20 },
     buildings: [
       [586, 510, 'shrine1', -1, 5],
       [591, 298, 'house3', -1, 15],
@@ -374,7 +374,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 9', xp: 140,
-    ai: { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 480 },
+    ai: { attack: 1.0, defense: 1.0, agility: 1.0, speed: 1.0, crystalInit: 200 },
     buildings: [
       [861, 120, 'house2', 0, 40],
       [129, 512, 'house2', 1, 40],
@@ -394,7 +394,7 @@ export const LEVELS = [
   {
     name: 'Level 10', xp: 150,
     boss: { x: 152, y: 320, hp: 500, speed: 0, radius: 44, dmg: 15, kind: 'turtle' },
-    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 20 },
     buildings: [
       [471, 222, 'shrine1', -1, 5],
       [535, 143, 'house1', -1, 5],
@@ -415,7 +415,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 11', xp: 160,
-    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.0, crystalInit: 480 },
+    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.0, crystalInit: 200 },
     buildings: [
       [866, 445, 'house3', 0, 60],
       [703, 486, 'shrine1', -1, 5],
@@ -435,7 +435,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 12', xp: 170,
-    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 20 },
     buildings: [
       [504, 181, 'tower1', -1, 5],
       [894, 272, 'house3', 0, 60],
@@ -458,7 +458,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 13', xp: 180,
-    ai: { attack: 1.6, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 48 },
+    ai: { attack: 1.6, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 20 },
     buildings: [
       [847, 427, 'house3', -1, 15],
       [618, 85, 'house2', -1, 10],
@@ -487,7 +487,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 14', xp: 190,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 },
     buildings: [
       [636, 317, 'tower3', -1, 25],
       [47, 375, 'house3', -1, 15],
@@ -528,7 +528,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 15', xp: 200,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 },
     buildings: [
       [388, 425, 'shrine1', -1, 5],
       [199, 187, 'tower3', -1, 50],
@@ -562,7 +562,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 16', xp: 210,
-    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 20 },
     buildings: [
       [642, 530, 'house2', -1, 10],
       [900, 96, 'house1', -1, 5],
@@ -589,7 +589,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 17', xp: 220,
-    ai: { attack: 1.8, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 20 },
     buildings: [
       [58, 109, 'house3', -1, 15],
       [67, 366, 'house1', -1, 5],
@@ -623,7 +623,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 18', xp: 230,
-    ai: { attack: 1.6, defense: 1.4, agility: 1.6, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.6, defense: 1.4, agility: 1.6, speed: 1.4, crystalInit: 20 },
     buildings: [
       [742, 515, 'house3', -1, 30],
       [323, 539, 'house1', -1, 5],
@@ -648,7 +648,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 19', xp: 240,
-    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.2, crystalInit: 480 },
+    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.2, crystalInit: 200 },
     buildings: [
       [307, 496, 'tower1', -1, 5],
       [239, 174, 'house3', 2, 60],
@@ -665,7 +665,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 20', xp: 250,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 20 },
     boss: { x: 182, y: 254, hp: 500, speed: 0, radius: 40, dmg: 15, kind: 'scorpion' },
     buildings: [
       [799, 330, 'house3', -1, 15],
@@ -685,7 +685,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 21', xp: 260,
-    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 20 },
     buildings: [
       [627, 438, 'house3', 2, 60],
       [805, 448, 'house2', -1, 10],
@@ -711,7 +711,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 22', xp: 270,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 },
     buildings: [
       [651, 351, 'house3', -1, 60],
       [166, 81, 'house1', -1, 5],
@@ -751,7 +751,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 23', xp: 280,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.6, crystalInit: 20 },
     buildings: [
       [185, 220, 'house1', -1, 5],
       [745, 303, 'shrine1', -1, 5],
@@ -783,7 +783,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 24', xp: 290,
-    ai: { attack: 1.6, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.6, defense: 1.4, agility: 1.4, speed: 1.4, crystalInit: 20 },
     buildings: [
       [473, 430, 'house3', -1, 15],
       [96, 228, 'house1', -1, 5],
@@ -810,7 +810,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 25', xp: 300,
-    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 20 },
     buildings: [
       [808, 173, 'house3', 1, 60],
       [901, 278, 'house2', -1, 10],
@@ -843,7 +843,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 26', xp: 310,
-    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 48 },
+    ai: { attack: 1.4, defense: 1.2, agility: 1.2, speed: 1.4, crystalInit: 20 },
     buildings: [
       [201, 103, 'house3', 0, 60],
       [49, 210, 'house1', -1, 5],
@@ -872,7 +872,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 27', xp: 320,
-    ai: { attack: 1.6, defense: 1.6, agility: 1.6, speed: 1.6, crystalInit: 48 },
+    ai: { attack: 1.6, defense: 1.6, agility: 1.6, speed: 1.6, crystalInit: 20 },
     buildings: [
       [68, 427, 'tower3', -1, 50],
       [232, 270, 'tower1', -1, 5],
@@ -897,7 +897,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 28', xp: 330,
-    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.1, crystalInit: 480 },
+    ai: { attack: 1.2, defense: 1.2, agility: 1.0, speed: 1.1, crystalInit: 200 },
     buildings: [
       [735, 377, 'tower1', -1, 5],
       [889, 526, 'house3', 0, 60],
@@ -921,7 +921,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 29', xp: 340,
-    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 48 },
+    ai: { attack: 1.8, defense: 1.8, agility: 1.6, speed: 1.6, crystalInit: 20 },
     buildings: [
       [296, 505, 'house3', 2, 60],
       [106, 125, 'house5', -1, 30],
@@ -953,7 +953,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 30', xp: 350,
-    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 20 },
     boss: { x: 816, y: 374, hp: 1000, speed: 0, radius: 40, dmg: 15, kind: 'octopus' },
     buildings: [
       [189, 120, 'house3', -1, 15],
@@ -983,7 +983,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 31', xp: 360,
-    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 20 },
     buildings: [
       [374, 530, 'tower3', -1, 15],
       [323, 338, 'tower3', -1, 15],
@@ -1017,7 +1017,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 32', xp: 370,
-    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 20 },
     buildings: [
       [207, 243, 'tower3', 3, 10],
       [741, 434, 'tower3', -1, 25],
@@ -1043,7 +1043,7 @@ export const LEVELS = [
   },
   {
     name: 'Level 33', xp: 380,
-    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 48 },
+    ai: { attack: 2.0, defense: 1.8, agility: 2.0, speed: 1.8, crystalInit: 20 },
     buildings: [
       [418, 246, 'tower3', -1, 25],
       [505, 176, 'tower3', -1, 25],

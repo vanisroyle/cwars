@@ -28,15 +28,14 @@ export class Game {
     this.civs = [];
     this.civs.push({ id: 0, color: playerCivStats.color, stats: effectiveStats(playerCivStats.stats, playerStatRanks), crystals: 0, spellRanks: playerSpellRanks, cooldowns: {}, ai: false });
     const aiCount = Math.max(...level.buildings.map(b => b[3])) || 0;
-    const diff = 1 + (level.index || 0) * 0.06;
-    const lai = level.ai || { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 48 };
+    const lai = level.ai || { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 };
     for (let i = 1; i <= aiCount; i++) {
       const st = { ...AI_STATS };
       // Original normal mode dampens enemy stats: stat -> int + frac/1.7.
       const damp = v => Math.floor(v) + (v - Math.floor(v)) / 1.7;
-      st.attack *= diff * damp(lai.attack) / 1.8; st.defense *= diff * damp(lai.defense) / 1.8;
-      st.agility *= diff * damp(lai.agility) / 1.8; st.speed = Math.min(1.3, st.speed * diff * damp(lai.speed) / 1.8);
-      st.crystalInit = Math.min(st.crystalMax, Math.max(st.crystalInit, lai.crystalInit));
+      st.attack *= damp(lai.attack); st.defense *= damp(lai.defense);
+      st.agility *= damp(lai.agility); st.speed = Math.min(1.3, st.speed * damp(lai.speed));
+      st.crystalInit = Math.min(st.crystalMax, lai.crystalInit);
       this.civs.push({ id: i, color: AI_CIV_TINTS[(i - 1) % AI_CIV_TINTS.length], stats: st, crystals: st.crystalInit, cooldowns: {}, ai: true, aiTimer: 1 + i * 1.3, aiSpells: ['fireball', 'meteorite'] });
     }
     this.civs[0].crystals = this.civs[0].stats.crystalInit;
@@ -365,7 +364,8 @@ export class Game {
       for (const b of this.buildings) {
         if (b.swampT > 0 && Math.hypot(g.x - b.x, g.y - b.y) <= SPELL_POWER.swamp.r + b.type.r) sp *= SPELL_POWER.swamp.slow;
       }
-      if (d < 6) {
+      const arrive = g.target === this.boss ? this.boss.r + 6 : 6;
+      if (d < arrive) {
         if (g.target === this.boss) {
           // Troops reaching the boss head chip its health.
           this.boss.hp -= g.count * this.civs[g.owner].stats.attack;
