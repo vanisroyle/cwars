@@ -6,15 +6,25 @@ html, body {
   font-family: Georgia, 'Times New Roman', serif;
   color: #3a2a14;
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #app {
-  position: relative;
+  position: absolute;
   width: 960px;
   height: 600px;
-  margin: 0 auto;
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  transform-origin: center;
 }
 
 #game-canvas {
@@ -22,6 +32,7 @@ html, body {
   width: 960px;
   height: 600px;
   cursor: crosshair;
+  touch-action: none;
 }
 
 .hidden { display: none !important; }
@@ -47,7 +58,20 @@ html, body {
   max-width: 620px;
 }
 
-.panel.wide { max-width: 800px; width: 780px; max-height: 560px; overflow-y: auto; }
+.panel.wide { max-width: 800px; width: min(780px, 92%); max-height: 560px; overflow-y: auto; }
+
+/* Small screens: tighter panels so everything stays reachable */
+@media (max-width: 700px) {
+  .panel { padding: 18px 14px; }
+  .panel h1 { font-size: 30px; }
+  .panel h2 { font-size: 21px; }
+  .panel.wide { max-height: 92vh; }
+  #civ-cards { flex-direction: column; gap: 8px; }
+  .civ-card .civ-desc { min-height: 0; }
+  #level-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .upgrade-cols { flex-direction: column; gap: 12px; }
+  .help-text { font-size: 13px; }
+}
 
 .panel h1 {
   font-size: 44px;

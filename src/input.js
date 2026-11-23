@@ -1,4 +1,4 @@
-// Mouse input: drag-select own buildings, release on target; spell targeting.
+// Pointer input (mouse + touch): drag-select own buildings, release on target; spell targeting.
 import { OWNER } from './data.js';
 
 export class Input {
@@ -13,9 +13,10 @@ export class Input {
     this.hoverBuilding = null;
     this.spellTarget = null; // {r} radius preview while spell armed
 
-    canvas.addEventListener('mousedown', e => this.down(e));
-    canvas.addEventListener('mousemove', e => this.move(e));
-    window.addEventListener('mouseup', e => this.up(e));
+    canvas.addEventListener('pointerdown', e => this.down(e));
+    canvas.addEventListener('pointermove', e => this.move(e));
+    window.addEventListener('pointerup', e => this.up(e));
+    window.addEventListener('pointercancel', () => { this.dragging = false; this.selected.clear(); });
     canvas.addEventListener('contextmenu', e => e.preventDefault());
   }
 
@@ -25,6 +26,7 @@ export class Input {
   }
 
   down(e) {
+    if (!e.isPrimary) return;
     const p = this.pos(e);
     this.mouse = p;
     if (e.button !== 0) { this.selected.clear(); this.dragging = false; return; }
@@ -37,6 +39,7 @@ export class Input {
   }
 
   move(e) {
+    if (!e.isPrimary) return;
     const p = this.pos(e);
     this.mouse = p;
     this.hoverBuilding = this.game.buildingAt(p.x, p.y, 0);
@@ -54,9 +57,10 @@ export class Input {
   }
 
   up(e) {
+    if (!e.isPrimary) return;
     const p = this.pos(e);
     this.mouse = p;
-    if (e.button !== 0) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
     if (this.spellTarget) {
       // Only casts land on the canvas; clicks on the spell bar cancel via its own handler.
       if (e.target === this.canvas) this.onCast(p.x, p.y);

@@ -10,6 +10,15 @@ const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
 const ctx = canvas.getContext('2d');
 
+// Scale the fixed 960x600 stage to fit any screen (mobile + desktop).
+function fit() {
+  const s = Math.min(window.innerWidth / 960, window.innerHeight / 600);
+  document.getElementById('app').style.setProperty('--scale', Math.min(1, s));
+}
+window.addEventListener('resize', fit);
+window.addEventListener('orientationchange', fit);
+fit();
+
 // ---------- Save ----------
 const SAVE_KEY = 'cwars_save_v1';
 let save = loadSave();
@@ -43,6 +52,7 @@ function startLevel(idx) {
   const others = [1, 2, 3].filter(r => r !== playerRace);
   const raceOf = (o) => (o === 0 ? playerRace : (o <= 2 ? others[o - 1] : 4));
   game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells, raceOf);
+  window.__game = game; // debug/testing hook
   armedSpell = null;
   resetTerrain();
   sfx.music('bgMusic');
@@ -51,6 +61,7 @@ function startLevel(idx) {
       if (!armedSpell || !game) return;
       game.cast(0, armedSpell, x, y);
       disarmSpell();
+      $('spell-info').classList.add('hidden');
     });
   } else {
     input.game = game;
@@ -267,6 +278,11 @@ function frame(t) {
   }
   if (game) render(ctx, game, input || { mouse: { x: 0, y: 0 }, selected: new Set() });
   else { ctx.fillStyle = '#1a120b'; ctx.fillRect(0, 0, 960, 600); }
+}
+
+// Offline play: register the service worker (skipped for file:// previews).
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // Give the player a couple of starter spells so the mechanic is discoverable.
