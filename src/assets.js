@@ -15,8 +15,9 @@ export function buildingImg(type, raceIdx) {
   if (img) return img;
   return IMGS[`b/${type}_none.png`] || null;
 }
-export const unitImg = (raceIdx, walk) =>
-  IMGS[`u/${RACES[raceIdx] || 'race1'}${walk ? '_w' : ''}.png`] || null;
+// Per-race unit walk-cycle sprite sheets: [frameCount, frameWidth, frameHeight].
+export const UNI_SHEETS = { 1: [24, 31, 48], 2: [24, 34, 52], 3: [24, 38, 50], 4: [24, 27, 29] };
+export const unitImg = (raceIdx) => IMGS[`u/${RACES[raceIdx] || 'race1'}.png`] || null;
 export const bossImg = (name) => IMGS[`boss/${name}.png`] || null;
 export const decorImg = (cid, ext) => IMGS[`d/${cid}.${ext}`] || null;
 
@@ -28,7 +29,7 @@ export function preload(decorCids) {
     if (r === 'race4' && !R4_OK.has(t)) continue;
     files.push(`b/${t}_${r}.png`);
   }
-  for (const r of ['race1', 'race2', 'race3', 'race4']) files.push(`u/${r}.png`, `u/${r}_w.png`);
+  for (const r of ['race1', 'race2', 'race3', 'race4']) files.push(`u/${r}.png`);
   for (const g of ['golem_none', 'golem_race1', 'golem_race2', 'golem_race3', 'octopus', 'scorpion', 'tentacle', 'turtle'])
     files.push(`boss/${g}.png`);
   for (const g of ['g1', 'g2', 'g3', 'g4']) files.push(`terrain/${g}.jpg`);

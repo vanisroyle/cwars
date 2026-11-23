@@ -1,7 +1,7 @@
 // Canvas renderer: terrain, buildings, armies, spells, boss.
 import { OWNER, NEUTRAL_COLOR } from './data.js';
 import { DECOR, DBND, TERRAIN } from './decor.js';
-import { IMGS, buildingImg, unitImg, bossImg, decorImg } from './assets.js';
+import { IMGS, buildingImg, unitImg, UNI_SHEETS, bossImg, decorImg } from './assets.js';
 
 const W = 960, H = 600;
 const K = 1.2; // stage 800x500 -> canvas 960x600
@@ -97,19 +97,28 @@ function drawBuilding(c, b, civs, sel, raceOf) {
   c.fillText(txt, lx + 17, ly + 12);
 }
 
-function drawGroup(c, g, civs, raceOf) {
+function drawGroup(c, g, civs, raceOf, gameTime) {
   const col = civs[g.owner].color;
   const n = Math.min(30, Math.ceil(g.count));
   const spread = 8 + Math.min(16, Math.sqrt(g.count) * 2);
-  const img = unitImg(raceOf(g.owner), (g.x | 0) % 2 === 0);
-  const su = g.unitKey === 'heavy' ? 22 : g.unitKey === 'cavalry' ? 20 : 16;
+  const raceIdx = raceOf(g.owner);
+  const img = unitImg(raceIdx);
+  const sheet = UNI_SHEETS[raceIdx];
+  const su = g.unitKey === 'heavy' ? 34 : g.unitKey === 'cavalry' ? 30 : 26;
+  const left = g.tx < g.x;
   for (let i = 0; i < n; i++) {
     const a = (i * 2.39996) + g.x; // deterministic scatter
     const rr = (i / n) * spread;
     const x = g.x + Math.cos(a) * rr, y = g.y + Math.sin(a) * rr * 0.7;
-    if (img && img.width) {
-      const s = su / img.height, w = img.width * s, h = img.height * s;
-      c.drawImage(img, x - w / 2, y - h + 3, w, h);
+    if (img && img.width && sheet) {
+      const [nf, fw, fh] = sheet;
+      const f = ((gameTime * 10 + i * 3) | 0) % nf;
+      const s = su / fh, w = fw * s, h = fh * s;
+      c.save();
+      c.translate(x, y);
+      if (left) c.scale(-1, 1);
+      c.drawImage(img, f * fw, 0, fw, fh, -w / 2, -h + 3, w, h);
+      c.restore();
     } else {
       c.fillStyle = col; c.strokeStyle = 'rgba(20,10,0,0.6)'; c.lineWidth = 1;
       c.beginPath(); c.arc(x, y, 3, 0, 7); c.fill(); c.stroke();
@@ -160,7 +169,7 @@ export function render(ctx, game, ui) {
     }
   }
 
-  for (const g of game.groups) drawGroup(ctx, g, game.civs, raceOf);
+  for (const g of game.groups) drawGroup(ctx, g, game.civs, raceOf, game.time || 0);
 
   // Arrows.
   for (const a of game.arrows) {
