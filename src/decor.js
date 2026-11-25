@@ -197,7 +197,7 @@ export const TERRAIN = {
     4: [],
     5: [],
     7: [],
-    9: [['river2', 480.45, 253.95, -425, -297.5, 850, 595, 0]],
+    9: [],
     11: [],
     12: [],
     13: [],
@@ -214,10 +214,12 @@ export const TERRAIN = {
 // [kind, x, y, flip] — x/y are the original sprite placements in 800x500 space;
 // the renderer applies each kind's internal shape-bounds offset.
 export const WATER = {
+  0: [['lake', 480.45, 253.95, 0]],
   2: [['s2712', 0, 0, 0], ['river', 237, 221, 0], ['s2721', 0, 0, 0]],
   4: [['river', -43, 152, 1], ['river', 107, 438.45, 0]],
   5: [['s2723', 0, 0, 0]],
   7: [['river', 455, 187, 1]],
+  9: [['lake', 480.45, 253.95, 0]],
   11: [['s2736', 0, 0, 0]],
   12: [['s2737', 0, 0, 0]],
   13: [['s2738', 0, 0, 0]],
@@ -225,7 +227,10 @@ export const WATER = {
   18: [['s2740', 0, 0, 0]],
   19: [['s2742', 0, 0, 0]],
   21: [['lake', 532, 247.5, 0]],
+  22: [['lake', 532, 247.5, 0]],
+  23: [['lake', 532, 247.5, 0]],
   26: [['lake', 332, 247.5, 1]],
+  27: [['lake', 332, 247.5, 1]],
 };
 // Internal shape-bounds offsets (px in 800x500 space): the artwork hangs up-left of the placement point.
 export const WATER_OFF = {
