@@ -16,7 +16,7 @@ export function buildingImg(type, raceIdx) {
   return IMGS[`b/${type}_none.png`] || null;
 }
 // Per-race unit walk-cycle sprite sheets: [frameCount, frameWidth, frameHeight].
-export const UNI_SHEETS = { 1: [24, 31, 48], 2: [24, 34, 52], 3: [24, 38, 50], 4: [24, 27, 29] };
+export const UNI_SHEETS = { 1: [25, 36, 47], 2: [25, 37, 51], 3: [25, 40, 49], 4: [25, 29, 28] };
 export const unitImg = (raceIdx) => IMGS[`u/${RACES[raceIdx] || 'race1'}.png`] || null;
 export const bossImg = (name) => IMGS[`boss/${name}.png`] || null;
 export const decorImg = (cid, ext) => IMGS[`d/${cid}.${ext}`] || null;

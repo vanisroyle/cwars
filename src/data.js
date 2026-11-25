@@ -13,8 +13,8 @@ export const NEUTRAL_COLOR = '#8a7a5e';
 
 export const UNITS = {
   infantry: { name: 'Infantry',      atk: 1, speed: 46, radius: 3 },
-  cavalry:  { name: 'Cavalry',       atk: 1, speed: 92, radius: 3 },
-  heavy:    { name: 'Heavy Infantry',atk: 1, speed: 36, radius: 4, worth: 2 },
+  cavalry:  { name: 'Cavalry',       atk: 1, speed: 68, radius: 3 },
+  heavy:    { name: 'Heavy Infantry',atk: 1, speed: 47, radius: 4, worth: 2 },
 };
 
 export const BUILDING_TYPES = {
