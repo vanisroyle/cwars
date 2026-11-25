@@ -209,3 +209,22 @@ export const TERRAIN = {
     26: [['river2', 332, 247.5, -425, -297.5, 850, 595, 1]],
   },
 };
+
+// Animated/static water pieces per level, extracted from wareng.StageContainer (sprite 2750).
+// [kind, x, y] in original 800x500 space; river/lake cycle frames, s* are static overlays.
+export const WATER = {
+  2: [['s2712', 0, 0], ['river', 237, 221], ['s2721', 0, 0]],
+  4: [['river', -43, 152], ['river', 107, 438.45]],
+  5: [['s2723', 0, 0]],
+  7: [['river', 455, 187]],
+  11: [['s2736', 0, 0]],
+  12: [['s2737', 0, 0]],
+  13: [['s2738', 0, 0]],
+  16: [['s2739', 0, 0]],
+  18: [['s2740', 0, 0]],
+  19: [['s2742', 0, 0]],
+  21: [['lake', 532, 247.5]],
+  26: [['lake', 332, 247.5]],
+};
+export const RIVER_FRAMES = ['river1', 'river4', 'river7', 'river10', 'river13', 'river16', 'river19', 'river22'];
+export const LAKE_FRAMES = ['lake1', 'lake3', 'lake5', 'lake7', 'lake9', 'lake11', 'lake13', 'lake15'];

@@ -1,6 +1,6 @@
 // Canvas renderer: terrain, buildings, armies, spells, boss.
 import { OWNER, NEUTRAL_COLOR } from './data.js';
-import { DECOR, DBND, TERRAIN } from './decor.js';
+import { DECOR, DBND, TERRAIN, WATER, RIVER_FRAMES, LAKE_FRAMES } from './decor.js';
 import { IMGS, buildingImg, unitImg, UNI_SHEETS, bossImg, decorImg } from './assets.js';
 
 const W = 960, H = 600;
@@ -147,6 +147,18 @@ export function render(ctx, game, ui) {
   if (!terrain || terrainLevel !== game.levelIdx) buildTerrain(game.levelIdx);
   ctx.clearRect(0, 0, W, H);
   ctx.drawImage(terrain, 0, 0);
+
+  // Water pieces (rivers/lakes) extracted from the original StageContainer.
+  // Animated at the original 25fps cycle; drawn over ground, under buildings.
+  for (const [kind, wx, wy] of (WATER[game.levelIdx] || [])) {
+    let key;
+    if (kind === 'river') key = RIVER_FRAMES[((game.time * 25) | 0) % RIVER_FRAMES.length];
+    else if (kind === 'lake') key = LAKE_FRAMES[((game.time * 25) | 0) % LAKE_FRAMES.length];
+    else key = kind;
+    const img = IMGS[`water/${key}.png`];
+    if (img && img.width) ctx.drawImage(img, wx * K, wy * K, img.width * K, img.height * K);
+  }
+
   const raceOf = game.raceOf || ((o) => Math.min(o + 1, 4));
 
   // Hovered tower range.

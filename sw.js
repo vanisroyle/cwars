@@ -1,6 +1,6 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v7';
+const CACHE = 'cwars-v8';
 const FILES = [
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
@@ -293,6 +293,31 @@ const FILES = [
   'src/render.js',
   'src/tutorial.js',
   'sw.js',
+  'assets/img/water/river1.png',
+  'assets/img/water/river4.png',
+  'assets/img/water/river7.png',
+  'assets/img/water/river10.png',
+  'assets/img/water/river13.png',
+  'assets/img/water/river16.png',
+  'assets/img/water/river19.png',
+  'assets/img/water/river22.png',
+  'assets/img/water/lake1.png',
+  'assets/img/water/lake3.png',
+  'assets/img/water/lake5.png',
+  'assets/img/water/lake7.png',
+  'assets/img/water/lake9.png',
+  'assets/img/water/lake11.png',
+  'assets/img/water/lake13.png',
+  'assets/img/water/lake15.png',
+  'assets/img/water/s2712.png',
+  'assets/img/water/s2721.png',
+  'assets/img/water/s2723.png',
+  'assets/img/water/s2736.png',
+  'assets/img/water/s2737.png',
+  'assets/img/water/s2738.png',
+  'assets/img/water/s2739.png',
+  'assets/img/water/s2740.png',
+  'assets/img/water/s2742.png',
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
