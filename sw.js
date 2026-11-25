@@ -1,6 +1,6 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v14';
+const CACHE = 'cwars-v15';
 const FILES = [
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
@@ -324,8 +324,21 @@ const FILES = [
   'assets/img/water/s2740.png',
   'assets/img/water/s2742.png',
 ];
+// A response stored with redirect:true is rejected when served for a navigation
+// (redirect mode 'manual'), so rebuild responses before caching.
+function cleanResponse(r) {
+  if (!r.redirected) return r;
+  return r.blob().then(b => new Response(b, { status: r.status, statusText: r.statusText, headers: r.headers }));
+}
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE).then(c => Promise.all(FILES.map(f =>
+      fetch(f, { redirect: 'follow' }).then(r => {
+        if (!r.ok) throw new Error(`precache failed: ${f}`);
+        return Promise.resolve(cleanResponse(r)).then(cr => c.put(f, cr));
+      })
+    ))).then(() => self.skipWaiting())
+  );
 });
 self.addEventListener('activate', e => {
   // Only delete this app's own caches — other apps on the same origin keep theirs.
@@ -342,7 +355,7 @@ self.addEventListener('fetch', e => {
       fetch(e.request).then(r => {
         if (r.ok) {
           const copy = r.clone();
-          caches.open(CACHE).then(c => c.put(e.request, copy));
+          Promise.resolve(cleanResponse(copy)).then(cr => caches.open(CACHE).then(c => c.put(e.request, cr)));
           return r;
         }
         // Server error (e.g. 503 while the host is down): fall back to the cached copy
