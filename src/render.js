@@ -79,22 +79,21 @@ function drawBuilding(c, b, civs, sel, raceOf) {
   }
   // Tower range hint on hover handled by input layer.
 
-  // Original-style label: white pill, owner-colored flag, dark pop number.
+  // Original-style label: small parchment scroll chip with dark pop number.
   const txt = String(Math.floor(b.pop));
   c.font = 'bold 11px Arial';
   const tw = c.measureText(txt).width;
-  const pw = tw + 24, ph = 15;
-  const lx = b.x - pw / 2, ly = b.y - r - 20;
-  c.fillStyle = 'rgba(255,255,255,0.92)';
-  c.strokeStyle = 'rgba(0,0,0,0.4)'; c.lineWidth = 1;
+  const pw = tw + 14, ph = 14;
+  const lx = b.x - pw / 2, ly = b.y - r - 19;
+  c.fillStyle = '#e3dcc4';
+  c.strokeStyle = '#8a7f62'; c.lineWidth = 1;
   c.beginPath(); c.roundRect(lx, ly, pw, ph, 3); c.fill(); c.stroke();
-  // Flag: pole + pennant in owner color.
-  const fx = lx + 5, fy = ly + 2;
-  c.strokeStyle = '#555'; c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx, fy + 11); c.stroke();
-  c.fillStyle = b.owner < 0 ? '#bbb' : col;
-  c.beginPath(); c.moveTo(fx, fy); c.lineTo(fx + 9, fy + 3); c.lineTo(fx, fy + 6); c.closePath(); c.fill();
-  c.fillStyle = '#222'; c.textAlign = 'left';
-  c.fillText(txt, lx + 17, ly + 12);
+  // Scroll curls at both ends.
+  c.fillStyle = '#c9bd9c';
+  c.beginPath(); c.arc(lx + 2, ly + ph / 2, 2.5, 0, 7); c.fill();
+  c.beginPath(); c.arc(lx + pw - 2, ly + ph / 2, 2.5, 0, 7); c.fill();
+  c.fillStyle = '#2a2015'; c.textAlign = 'center';
+  c.fillText(txt, lx + pw / 2, ly + 11);
 }
 
 function drawGroup(c, g, civs, raceOf, gameTime) {
