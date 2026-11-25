@@ -1,6 +1,6 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v13';
+const CACHE = 'cwars-v14';
 const FILES = [
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
@@ -343,8 +343,17 @@ self.addEventListener('fetch', e => {
         if (r.ok) {
           const copy = r.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
+          return r;
         }
-        return r;
+        // Server error (e.g. 503 while the host is down): fall back to the cached copy
+        // exactly as if the network were unavailable — the installed game must still start.
+        return caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(m => {
+          if (m) return m;
+          if (e.request.mode === 'navigate') {
+            return caches.open(CACHE).then(cc => cc.match('index.html')).then(mi => mi || r);
+          }
+          return r;
+        });
       }).catch(err => {
         return caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(m => {
           if (m) return m;
