@@ -267,7 +267,12 @@ export class Game {
     // would otherwise walk off the map before turning toward the target.
     const c = [{ x: 64, y: target.y }, { x: W - 64, y: target.y }, { x: target.x, y: 64 }, { x: target.x, y: H - 64 }];
     c.sort((a, b2) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b2.x - target.x, b2.y - target.y));
-    return c[0];
+    // Never spawn within the target's arrival radius — reinforcements must actually
+    // march in, or Support would capture buildings before defenders can intercept.
+    for (const p of c) {
+      if (Math.hypot(p.x - target.x, p.y - target.y) >= 120) return p;
+    }
+    return c[c.length - 1];
   }
 
   aoeDamage(x, y, r, dmg, owner, { buildingMin = 0, vsUnits = true, destroyBuildings = false } = {}) {
