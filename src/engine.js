@@ -7,6 +7,7 @@ import {
 } from './data.js';
 
 const W = 960, H = 600;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 export function effectiveStats(civBase, statRanks) {
   const s = { ...civBase };
@@ -265,14 +266,22 @@ export class Game {
     // Spawn support troops at nearest screen edge to target.
     // Inset into the field: squads fan outward at launch, so edge-spawned troops
     // would otherwise walk off the map before turning toward the target.
-    const c = [{ x: 64, y: target.y }, { x: W - 64, y: target.y }, { x: target.x, y: 64 }, { x: target.x, y: H - 64 }];
-    c.sort((a, b2) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b2.x - target.x, b2.y - target.y));
-    // Never spawn within the target's arrival radius — reinforcements must actually
-    // march in, or Support would capture buildings before defenders can intercept.
-    for (const p of c) {
-      if (Math.hypot(p.x - target.x, p.y - target.y) >= 120) return p;
+    // Candidates along each edge: the target-aligned point plus slides along the edge,
+    // so an aligned point just inside the minimum distance slides a little instead of
+    // skipping the edge entirely.
+    const c = [];
+    for (const off of [0, -50, 50, -100, 100, -160, 160]) {
+      c.push({ x: 64, y: clamp(target.y + off, 64, H - 64) });
+      c.push({ x: W - 64, y: clamp(target.y + off, 64, H - 64) });
+      c.push({ x: clamp(target.x + off, 64, W - 64), y: 64 });
+      c.push({ x: clamp(target.x + off, 64, W - 64), y: H - 64 });
     }
-    return c[c.length - 1];
+    const dist = p => Math.hypot(p.x - target.x, p.y - target.y);
+    // Reinforcements must actually march in, or Support would capture buildings
+    // before defenders can intercept — never spawn within the arrival radius.
+    const ok = c.filter(p => dist(p) >= 120);
+    ok.sort((a, b2) => dist(a) - dist(b2));
+    return ok[0] || c.sort((a, b2) => dist(b2) - dist(a))[0];
   }
 
   aoeDamage(x, y, r, dmg, owner, { buildingMin = 0, vsUnits = true, destroyBuildings = false } = {}) {
