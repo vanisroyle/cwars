@@ -156,8 +156,15 @@ export class Game {
     const attackersNeeded = b.pop / ratio;
     // Original: each enemy killed pays +1 crystal into the attacking player's pool.
     const killed = Math.min(b.pop, g.count * ratio);
-    if (g.owner === OWNER.PLAYER && killed >= 1) {
-      atkCiv.crystals = Math.min(atkCiv.stats.crystalMax, atkCiv.crystals + Math.floor(killed));
+    if (g.owner === OWNER.PLAYER && killed > 0) {
+      // Soldiers trickle in one at a time — carry the fractional credit so
+      // rounding per soldier doesn't eat kills that add up to whole crystals.
+      atkCiv.crystalFrac = (atkCiv.crystalFrac || 0) + killed;
+      const whole = Math.floor(atkCiv.crystalFrac);
+      if (whole >= 1) {
+        atkCiv.crystalFrac -= whole;
+        atkCiv.crystals = Math.min(atkCiv.stats.crystalMax, atkCiv.crystals + whole);
+      }
     }
     if (g.count > attackersNeeded) {
       const survivors = g.count - attackersNeeded;
@@ -256,7 +263,9 @@ export class Game {
 
   spawnEdge(target) {
     // Spawn support troops at nearest screen edge to target.
-    const c = [{ x: 0, y: target.y }, { x: W, y: target.y }, { x: target.x, y: 0 }, { x: target.x, y: H }];
+    // Inset into the field: squads fan outward at launch, so edge-spawned troops
+    // would otherwise walk off the map before turning toward the target.
+    const c = [{ x: 64, y: target.y }, { x: W - 64, y: target.y }, { x: target.x, y: 64 }, { x: target.x, y: H - 64 }];
     c.sort((a, b2) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b2.x - target.x, b2.y - target.y));
     return c[0];
   }
