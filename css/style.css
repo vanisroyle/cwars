@@ -245,7 +245,7 @@ button.big { font-size: 22px; padding: 12px 40px; }
 /* Portrait phones: floating rotate hint (non-blocking) */
 #rotate-hint {
   position: absolute;
-  top: 6px;
+  top: calc(6px + env(safe-area-inset-top, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 60;
