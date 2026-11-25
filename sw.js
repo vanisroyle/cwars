@@ -2,6 +2,7 @@
 // All paths are relative to this script's scope so subdirectory hosting works.
 const CACHE = 'cwars-v5';
 const FILES = [
+  '.',
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
   'assets/img/b/house1_race2.png',

@@ -32,10 +32,9 @@ export class Input {
     this.mouse = p;
     if (TUT.active) {
       const hit = TUT.hit(p.x, p.y);
-      if (hit === 'next') TUT.next();
-      else if (hit === 'skip') { TUT.finish(); this.onTutEnd && this.onTutEnd(); }
-      if (!TUT.active) this.onTutEnd && this.onTutEnd();
-      return;
+      if (hit === 'next') { TUT.next(); if (!TUT.active) this.onTutEnd && this.onTutEnd(); return; }
+      if (hit === 'skip') { TUT.finish(); this.onTutEnd && this.onTutEnd(); return; }
+      // otherwise fall through: steps 1-2 need real gameplay input
     }
     if (e.button !== 0) { this.selected.clear(); this.dragging = false; return; }
     if (this.spellTarget) return; // spell click handled in up()
@@ -74,7 +73,6 @@ export class Input {
       if (e.target === this.canvas) this.onCast(p.x, p.y);
       return;
     }
-    if (TUT.active) return;
     if (!this.dragging) return;
     this.dragging = false;
     const boss = this.game.boss;
@@ -84,8 +82,9 @@ export class Input {
       for (const b of this.selected) {
         if (b !== target) this.game.sendTroops(b, target, OWNER.PLAYER);
       }
+      const tutWasActive = TUT.active;
       TUT.notifySend();
-      if (!TUT.active) this.onTutEnd && this.onTutEnd();
+      if (tutWasActive && !TUT.active) this.onTutEnd && this.onTutEnd();
     }
     this.selected.clear();
   }
