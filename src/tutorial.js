@@ -27,8 +27,8 @@ export const TUT = {
   // Button rects in canvas coords.
   rects() {
     return {
-      next: { x: 668, y: 500, w: 96, h: 34 },
-      skip: { x: 790, y: 500, w: 150, h: 34 },
+      next: { x: 668, y: 552, w: 96, h: 34 },
+      skip: { x: 790, y: 552, w: 150, h: 34 },
     };
   },
   hit(x, y) {
