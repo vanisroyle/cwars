@@ -307,8 +307,12 @@ self.addEventListener('fetch', e => {
     caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(hit => {
       if (hit) return hit;
       return fetch(e.request).then(r => {
-        const copy = r.clone();
-        caches.open(CACHE).then(cc => cc.put(e.request, copy));
+        // Never cache error pages (e.g. a 503 while the host is down) — they would
+        // be replayed forever, shadowing the real game.
+        if (r.ok) {
+          const copy = r.clone();
+          caches.open(CACHE).then(cc => cc.put(e.request, copy));
+        }
         return r;
       }).catch(err => {
         // Offline navigation to the root/directory URL: serve the cached index.
