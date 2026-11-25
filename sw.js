@@ -1,6 +1,6 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v12';
+const CACHE = 'cwars-v13';
 const FILES = [
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
@@ -223,6 +223,11 @@ const FILES = [
   'assets/img/u/race2.png',
   'assets/img/u/race3.png',
   'assets/img/u/race4.png',
+  'assets/img/ui/map.jpg',
+  'assets/img/ui/title.jpg',
+  'assets/img/ui/racechar_egypt.png',
+  'assets/img/ui/racechar_rome.png',
+  'assets/img/ui/racechar_china.png',
   'assets/img/ui/fireball.png',
   'assets/img/ui/fireball_d.png',
   'assets/img/ui/fireball_h.png',
@@ -328,6 +333,30 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  const isCode = e.request.mode === 'navigate' || /\.(html|js|css|webmanifest)$/.test(url.pathname) || url.pathname.endsWith('/');
+  if (isCode) {
+    // Network-first for code: a fresh load always runs a consistent, current version
+    // (cache-first here mixed old/new assets after updates and could break mid-session).
+    e.respondWith(
+      fetch(e.request).then(r => {
+        if (r.ok) {
+          const copy = r.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return r;
+      }).catch(err => {
+        return caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(m => {
+          if (m) return m;
+          if (e.request.mode === 'navigate') {
+            return caches.open(CACHE).then(cc => cc.match('index.html')).then(mi => mi || Promise.reject(err));
+          }
+          return Promise.reject(err);
+        });
+      })
+    );
+    return;
+  }
   e.respondWith(
     caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(hit => {
       if (hit) return hit;
@@ -340,10 +369,6 @@ self.addEventListener('fetch', e => {
         }
         return r;
       }).catch(err => {
-        // Offline navigation to the root/directory URL: serve the cached index.
-        if (e.request.mode === 'navigate') {
-          return caches.open(CACHE).then(cc => cc.match('index.html')).then(m => m || Promise.reject(err));
-        }
         throw err;
       });
     })

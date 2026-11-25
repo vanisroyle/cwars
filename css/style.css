@@ -263,3 +263,103 @@ button.big { font-size: 22px; padding: 12px 40px; }
 }
 #rotate-hint .rotate-icon { font-size: 22px; display: inline-block; animation: cwars-spin 2s ease-in-out infinite; }
 @keyframes cwars-spin { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(90deg); } }
+
+/* ---------- Original-style menu mimic ---------- */
+#screen-title {
+  background: url('../assets/img/ui/title.jpg') center/cover no-repeat;
+}
+#screen-title .panel {
+  background: none;
+  border: none;
+  box-shadow: none;
+  margin-top: 300px;
+}
+#screen-title h1, #screen-title .tagline { display: none; }
+#screen-title .footnote { color: #e8d5a8; text-shadow: 0 1px 3px #000; font-size: 11px; }
+
+/* Civ select — vertical banner cards like the original race menu */
+#screen-civ { background: rgba(20, 12, 4, 0.75); }
+.civ-card {
+  position: relative;
+  width: 170px;
+  padding-top: 54px;
+}
+.civ-card .civ-banner {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 46px; height: 64px;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+.civ-card .civ-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -12px; left: 0;
+  border-left: 23px solid transparent;
+  border-right: 23px solid transparent;
+}
+.civ-card .civ-char {
+  display: block;
+  margin: 6px auto 0;
+  height: 110px;
+  image-rendering: auto;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+}
+
+/* Level select — original parchment world map, vertically scrollable */
+#screen-levels { background: #14100a; flex-direction: column; align-items: stretch; justify-content: flex-start; }
+#levels-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 12px;
+  background: linear-gradient(160deg, #e8d5a8, #d9bf8a);
+  border-bottom: 3px solid #6b4c22;
+  z-index: 2;
+}
+#levels-head h2 { font-size: 20px; }
+#map-scroll {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+#map-inner {
+  position: relative;
+  width: 960px;
+  height: 1676px;
+  background: url('../assets/img/ui/map.jpg') 0 0/960px 1676px no-repeat;
+}
+.level-node {
+  position: absolute;
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  border: 3px solid #8a6a20;
+  background: radial-gradient(circle at 35% 30%, #f5e6b8, #d9b96a 70%, #b08a3a);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.55), inset 0 0 6px rgba(120,80,20,0.6);
+  color: #4a3010;
+  font-weight: bold;
+  font-size: 17px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-family: Georgia, serif;
+  text-shadow: 0 1px 0 #ffe9b0;
+  flex-direction: column;
+  line-height: 1;
+}
+.level-node .nstars { font-size: 9px; color: #7a4c00; letter-spacing: -1px; }
+.level-node:hover { transform: scale(1.12); }
+.level-node.locked {
+  background: radial-gradient(circle at 35% 30%, #9a8a68, #6a5a3c 70%, #4a3c24);
+  color: #2e2412;
+  cursor: default;
+  border-color: #4a3c20;
+}
+.level-node.locked::after { content: '✕'; position: absolute; font-size: 13px; color: rgba(30,20,5,0.75); }
+.level-node.locked .nnum, .level-node.locked .nstars { visibility: hidden; }
+.level-node.next { animation: nodepulse 1.2s infinite; border-color: #c89828; }
+@keyframes nodepulse {
+  0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.55), 0 0 0 0 rgba(255,220,120,0.7); }
+  50% { box-shadow: 0 2px 8px rgba(0,0,0,0.55), 0 0 0 12px rgba(255,220,120,0); }
+}

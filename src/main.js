@@ -155,12 +155,15 @@ function showTitle() { show('title'); game = null; sfx.music('menuMusic'); }
 function buildCivCards() {
   const wrap = $('civ-cards');
   wrap.innerHTML = '';
+  const BANNER = { egypt: '#8a8a3a', rome: '#a03028', china: '#5a7a8a' };
   for (const id in CIVS) {
     const c = CIVS[id];
     const st = c.stats;
     const el = document.createElement('div');
     el.className = 'civ-card';
-    el.innerHTML = `<h3 style="color:${c.color}">${c.name}</h3><div class="civ-desc">${c.desc}</div>
+    el.innerHTML = `<div class="civ-banner" style="background:${BANNER[id] || '#888'}"></div>
+      <img class="civ-char" src="assets/img/ui/racechar_${id}.png" draggable="false">
+      <h3 style="color:${c.color}">${c.name}</h3><div class="civ-desc">${c.desc}</div>
       <ul>
         <li>Attack ×${st.attack}</li><li>Defense ×${st.defense}</li>
         <li>Speed ×${st.speed}</li><li>Growth ×${st.agility}</li>
@@ -172,18 +175,40 @@ function buildCivCards() {
 }
 
 function buildLevels() {
-  const grid = $('level-grid');
-  grid.innerHTML = '';
+  // Original parchment world map: nodes at the exact positions extracted from the SWF Map sprite.
+  const POS = {
+    1: [520, 1380], 2: [79.5, 430.2], 3: [311.6, 821.8], 4: [98.5, 1128.9], 5: [279.4, 1111.1],
+    6: [401.6, 1195.2], 7: [444.9, 360.6], 8: [214.1, 950.6], 9: [571.0, 1284.7], 10: [360.1, 1029.2],
+    11: [85.5, 963.6], 12: [503.1, 697.5], 13: [267.1, 640.9], 14: [409.4, 139.1], 15: [593.4, 403.5],
+    16: [558.8, 476.7], 17: [289.8, 177.8], 18: [402.6, 578.6], 19: [230.2, 817.7], 20: [153.0, 585.2],
+    21: [564.3, 589.4], 22: [543.9, 161.2], 23: [331.7, 425.2], 24: [376.6, 703.1], 25: [467.9, 834.1],
+    26: [484.9, 933.1], 27: [284.3, 524.6], 28: [54.5, 825.1], 29: [208.0, 370.6], 30: [160.6, 171.9],
+    31: [107.4, 275.4], 32: [199.9, 294.9], 33: [305.9, 294.9],
+  };
+  const SC = 960 / 850; // map art is 850x1483, displayed at 960 wide
+  const inner = $('map-inner');
+  inner.innerHTML = '';
   LEVELS.forEach((lv, i) => {
+    const gameLevel = i; // index 0 = training (uses level-1 node), index N = original level N
+    let pos = POS[Math.max(1, gameLevel)] || POS[1];
+    if (gameLevel === 0) pos = [pos[0] - 70, pos[1] + 50]; // training node beside level 1
     const el = document.createElement('div');
     const locked = i > save.unlocked;
-    el.className = 'level-cell' + (locked ? ' locked' : '');
+    el.className = 'level-node' + (locked ? ' locked' : '') + (i === save.unlocked && !locked ? ' next' : '');
     const stars = save.stars[i] || 0;
-    el.innerHTML = `<div class="lv-num">${i + 1}</div><div class="lv-stars">${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}</div><div class="lv-name">${locked ? 'Locked' : lv.name}</div>`;
+    el.innerHTML = `<span class="nnum">${i === 0 ? 'T' : gameLevel}</span><span class="nstars">${'★'.repeat(stars)}</span>`;
+    el.style.left = `${pos[0] * SC}px`;
+    el.style.top = `${pos[1] * SC}px`;
+    el.title = locked ? 'Locked' : lv.name;
     if (!locked) el.addEventListener('click', () => startLevel(i));
-    grid.appendChild(el);
+    inner.appendChild(el);
   });
   $('levels-title').textContent = `Campaign — ${CIVS[save.civ].name}`;
+  // Scroll so the current level is in view (map is tall; progress runs bottom-up).
+  const cur = POS[Math.max(1, save.unlocked)] || POS[1];
+  requestAnimationFrame(() => {
+    $('map-scroll').scrollTop = Math.max(0, cur[1] * SC - 300);
+  });
 }
 
 function buildUpgrades() {
