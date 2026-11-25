@@ -241,3 +241,25 @@ button.big { font-size: 22px; padding: 12px 40px; }
   border-radius: 4px;
   font-size: 13px;
 }
+
+/* Portrait phones: floating rotate hint (non-blocking) */
+#rotate-hint {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  background: rgba(20, 12, 4, 0.85);
+  color: #f0e2c0;
+  border: 2px solid #6b4c22;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-size: 13px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+#rotate-hint .rotate-icon { font-size: 22px; display: inline-block; animation: cwars-spin 2s ease-in-out infinite; }
+@keyframes cwars-spin { 0%, 20% { transform: rotate(0); } 60%, 100% { transform: rotate(90deg); } }

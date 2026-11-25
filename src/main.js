@@ -13,8 +13,13 @@ const ctx = canvas.getContext('2d');
 
 // Scale the fixed 960x600 stage to fit any screen (mobile + desktop).
 function fit() {
-  const s = Math.min(window.innerWidth / 960, window.innerHeight / 600);
-  document.getElementById('app').style.setProperty('--scale', Math.min(1, s));
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const s = Math.min(vw / 960, vh / 600);
+  document.getElementById('app').style.setProperty('--scale', Math.min(2, s));
+  // Landscape game on a portrait phone: nudge the player to rotate.
+  const portrait = vh > vw;
+  const hint = $('rotate-hint');
+  if (hint) hint.classList.toggle('hidden', !portrait);
 }
 window.addEventListener('resize', fit);
 window.addEventListener('orientationchange', fit);

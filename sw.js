@@ -1,6 +1,6 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v8';
+const CACHE = 'cwars-v9';
 const FILES = [
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
