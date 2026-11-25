@@ -1,5 +1,6 @@
 // Pointer input (mouse + touch): drag-select own buildings, release on target; spell targeting.
 import { OWNER } from './data.js';
+import { TUT } from './tutorial.js';
 
 export class Input {
   constructor(canvas, game, onCast) {
@@ -29,6 +30,13 @@ export class Input {
     if (!e.isPrimary) return;
     const p = this.pos(e);
     this.mouse = p;
+    if (TUT.active) {
+      const hit = TUT.hit(p.x, p.y);
+      if (hit === 'next') TUT.next();
+      else if (hit === 'skip') { TUT.finish(); this.onTutEnd && this.onTutEnd(); }
+      if (!TUT.active) this.onTutEnd && this.onTutEnd();
+      return;
+    }
     if (e.button !== 0) { this.selected.clear(); this.dragging = false; return; }
     if (this.spellTarget) return; // spell click handled in up()
     const b = this.game.buildingAt(p.x, p.y, 6);
@@ -66,6 +74,7 @@ export class Input {
       if (e.target === this.canvas) this.onCast(p.x, p.y);
       return;
     }
+    if (TUT.active) return;
     if (!this.dragging) return;
     this.dragging = false;
     const boss = this.game.boss;
@@ -75,6 +84,8 @@ export class Input {
       for (const b of this.selected) {
         if (b !== target) this.game.sendTroops(b, target, OWNER.PLAYER);
       }
+      TUT.notifySend();
+      if (!TUT.active) this.onTutEnd && this.onTutEnd();
     }
     this.selected.clear();
   }

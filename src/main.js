@@ -5,6 +5,7 @@ import { render, resetTerrain } from './render.js';
 import { Input } from './input.js';
 import { preload, sfx, RACE_INDEX } from './assets.js';
 import { DECOR } from './decor.js';
+import { TUT } from './tutorial.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game-canvas');
@@ -68,6 +69,8 @@ function startLevel(idx) {
     input.disarmSpell();
   }
   buildSpellbar();
+  if (idx === 0 && !save.tutorialDone) TUT.start(); else TUT.finish();
+  if (input) input.onTutEnd = () => { save.tutorialDone = 1; persist(); };
   $('hud-level').textContent = LEVELS[idx].name;
   show(null);
 }
@@ -276,7 +279,7 @@ function frame(t) {
     refreshSpellbar();
     if (game.over) showResult(game.result === 'win');
   }
-  if (game) render(ctx, game, input || { mouse: { x: 0, y: 0 }, selected: new Set() });
+  if (game) { render(ctx, game, input || { mouse: { x: 0, y: 0 }, selected: new Set() }); TUT.draw(ctx); }
   else { ctx.fillStyle = '#1a120b'; ctx.fillRect(0, 0, 960, 600); }
 }
 
