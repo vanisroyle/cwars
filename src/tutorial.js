@@ -27,8 +27,8 @@ export const TUT = {
   // Button rects in canvas coords.
   rects() {
     return {
-      next: { x: 668, y: 480, w: 96, h: 34 },
-      skip: { x: 790, y: 480, w: 150, h: 34 },
+      next: { x: 668, y: 500, w: 96, h: 34 },
+      skip: { x: 790, y: 500, w: 150, h: 34 },
     };
   },
   hit(x, y) {
@@ -45,19 +45,19 @@ export const TUT = {
     c.fillStyle = 'rgba(0,0,0,0.35)';
     c.fillRect(0, 0, 960, 600);
     // Speech bubble.
-    const bx = 130, by = 260, bw = 560, bh = 190;
+    const bx = 130, by = 392, bw = 560, bh = 176;
     c.fillStyle = '#fff';
     c.strokeStyle = '#1a120b'; c.lineWidth = 4;
     c.beginPath(); c.ellipse(bx + bw / 2, by + bh / 2, bw / 2, bh / 2, 0, 0, 7); c.fill(); c.stroke();
     c.fillStyle = '#1a120b';
     c.textAlign = 'center';
     c.font = 'bold 15px Georgia';
-    c.fillText(st.title, bx + bw / 2, by + 48);
+    c.fillText(st.title, bx + bw / 2, by + 40);
     c.font = 'bold 14px Georgia';
     c.fillStyle = '#c22222';
     // Word-wrap the text.
     const words = st.text.split(' ');
-    let line = '', yy = by + 78;
+    let line = '', yy = by + 68;
     for (const w of words) {
       const t = line ? line + ' ' + w : w;
       if (c.measureText(t).width > bw - 90) {
