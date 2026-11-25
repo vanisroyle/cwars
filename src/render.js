@@ -98,49 +98,39 @@ function drawBuilding(c, b, civs, sel, raceOf) {
 
 function drawGroup(c, g, civs, raceOf, gameTime) {
   const col = civs[g.owner].color;
-  // Original: one soldier sprite per 3 population, marching in a fan formation
-  // that spreads wide while far from the target and converges near it.
-  const n = Math.max(1, Math.ceil(g.count / 3));
   const raceIdx = raceOf(g.owner);
   const img = unitImg(raceIdx);
   const sheet = UNI_SHEETS[raceIdx];
   const su = g.unitKey === 'heavy' ? 34 : g.unitKey === 'cavalry' ? 30 : 26;
-  const dx = g.tx - g.x, dy = g.ty - g.y;
-  const d = Math.hypot(dx, dy) || 1;
-  const dirx = dx / d, diry = dy / d;
-  const px = -diry, py = dirx; // perpendicular
-  // Formation width converges as the squad closes in (original converges within ~90px).
-  const conv = Math.max(0.2, Math.min(1, d / 90));
-  const spacing = 13;
-  const center = (n - 1) / 2;
-  const left = dx < 0;
-  for (let i = 0; i < n; i++) {
-    const lat = (i - center) * spacing * conv;
-    // Slight along-track stagger so they don't move as a rigid line.
-    const back = Math.abs(i - center) * 5 * conv;
-    const x = g.x + px * lat - dirx * back;
-    const y = g.y + py * lat - diry * back;
+  // Each soldier is its own entity marching on its own track (original WarAttack model).
+  const list = g.soldiers && g.soldiers.length ? g.soldiers : [{ x: g.x, y: g.y, pos: 0 }];
+  let flag = null;
+  for (let i = 0; i < list.length; i++) {
+    const s = list[i];
+    if (s.pos === 0 && !flag) flag = s;
+    const left = g.tx - s.x < 0;
     if (img && img.width && sheet) {
       const [nf, fw, fh] = sheet;
-      // 25fps walk cycle like the original, randomized phase per soldier.
+      // 25fps walk cycle like the original, offset phase per soldier.
       const f = ((gameTime * 25 + i * 7) | 0) % nf;
-      const s = su / fh, w = fw * s, h = fh * s;
+      const sc = su / fh, w = fw * sc, h = fh * sc;
       c.save();
-      c.translate(x, y);
+      c.translate(s.x, s.y);
       if (left) c.scale(-1, 1);
       c.drawImage(img, f * fw, 0, fw, fh, -w / 2, -h + 3, w, h);
       c.restore();
     } else {
       c.fillStyle = col; c.strokeStyle = 'rgba(20,10,0,0.6)'; c.lineWidth = 1;
-      c.beginPath(); c.arc(x, y, 3, 0, 7); c.fill(); c.stroke();
+      c.beginPath(); c.arc(s.x, s.y, 3, 0, 7); c.fill(); c.stroke();
     }
   }
-  // Squad size label above the flagman (center of the formation), as in the original.
-  const labelY = g.y - 16 - (n > 1 ? spacing * conv * 0.4 : 0);
+  // Squad size label above the flagman, as in the original.
+  const anchor = flag || list[0];
+  const labelY = anchor.y - 18;
   c.font = 'bold 12px Georgia'; c.textAlign = 'center';
   c.lineWidth = 3; c.strokeStyle = 'rgba(20,10,0,0.8)';
-  c.strokeText(String(Math.ceil(g.count)), g.x, labelY);
-  c.fillStyle = '#fff'; c.fillText(String(Math.ceil(g.count)), g.x, labelY);
+  c.strokeText(String(Math.ceil(g.count)), anchor.x, labelY);
+  c.fillStyle = '#fff'; c.fillText(String(Math.ceil(g.count)), anchor.x, labelY);
 }
 
 export function render(ctx, game, ui) {

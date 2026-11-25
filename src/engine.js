@@ -87,12 +87,49 @@ export class Game {
     if (s.left <= 0) building.send = null;
     const civ = this.civs[s.owner];
     const unit = UNITS[building.type.unit];
-    this.groups.push({
-      owner: s.owner, unitKey: building.type.unit, count,
-      x: building.x + (Math.random() - .5) * 8, y: building.y + (Math.random() - .5) * 8,
-      tx: s.target.x, ty: s.target.y, target: s.target, slow: 1,
-      speed: unit.speed * civ.stats.speed,
-    });
+    this.groups.push(this.makeSquad(s.owner, building.type.unit, count,
+      building.x, building.y, s.target, unit.speed * civ.stats.speed));
+  }
+
+  // Original: one soldier sprite per 3 population. The whole squad spawns at the
+  // source point at once; the center soldier is the flagman and walks straight,
+  // the others first fan outward, then march parallel, converging only near the target.
+  makeSquad(owner, unitKey, count, x, y, target, speed) {
+    const g = {
+      owner, unitKey, count,
+      x, y, tx: target.x, ty: target.y, target, slow: 1, speed,
+      sx: x, sy: y,
+      soldiers: [],
+    };
+    const n = Math.max(1, Math.ceil(count / 3));
+    const center = Math.ceil(n / 2);
+    const baseA = Math.atan2(target.y - y, target.x - x);
+    for (let i = 0; i < n; i++) {
+      const pos = (n - i) - center; // {..,2,1,0,-1,-2..} — 0 is the flagman
+      const popShare = Math.min(3, count - i * 3);
+      const fan = pos / Math.PI * 0.6 + baseA; // original fan: positionInGroup/PI*0.6
+      g.soldiers.push({
+        x, y, pos,
+        pop: popShare,
+        fx: Math.cos(fan), fy: Math.sin(fan),
+        dispT: pos === 0 ? 0 : 58.5 / speed, // original: 9 frames / speedParam — faster troops fan out less
+        lx: 0, ly: 0, // lateral offset from the source point, recorded while dispersing
+      });
+    }
+    return g;
+  }
+
+  // Keep soldier sprites consistent with the group's true population after
+  // spells/towers trim it: drop trailing soldiers or shrink the last one's share.
+  syncSoldiers(g) {
+    let total = 0;
+    for (const s of g.soldiers) total += s.pop;
+    let excess = total - g.count;
+    while (excess > 0 && g.soldiers.length) {
+      const s = g.soldiers[g.soldiers.length - 1];
+      if (s.pop <= excess) { excess -= s.pop; g.soldiers.pop(); }
+      else { s.pop -= excess; excess = 0; }
+    }
   }
 
   defPower(building) {
@@ -177,7 +214,7 @@ export class Game {
         const n = Math.round(rankVal(P.units[0], P.units[1], rank));
         const b = this.buildingAt(x, y, 20) || this.nearestBuilding(x, y);
         const edge = this.spawnEdge(b);
-        this.groups.push({ owner, unitKey: 'infantry', count: n, x: edge.x, y: edge.y, tx: b.x, ty: b.y, target: b, slow: 1, speed: UNITS.infantry.speed * 1.4 });
+        this.groups.push(this.makeSquad(owner, 'infantry', n, edge.x, edge.y, b, UNITS.infantry.speed * 1.4));
         break;
       }
       case 'hypnoses': {
@@ -354,29 +391,61 @@ export class Game {
     this.arrows = this.arrows.filter(a => a.t < a.life);
     this.groups = this.groups.filter(g => g.count > 0);
 
-    // Move groups. Slow is recomputed every tick so spell slows expire cleanly.
+    // Move squads — per-soldier movement exactly like the original WarAttack.Move():
+    // flagman marches straight at the target; the others fan out for the first stretch,
+    // then march parallel preserving their lateral offset, and only converge straight in
+    // within the last 75px. Each soldier enters the target individually (trickle-in).
     for (const g of this.groups) {
-      const dx = g.tx - g.x, dy = g.ty - g.y;
-      const d = Math.hypot(dx, dy);
+      this.syncSoldiers(g);
       let sp = g.speed * g.slow;
       g.slow = 1;
-      // Swamp slowdown near swamped buildings.
       for (const b of this.buildings) {
         if (b.swampT > 0 && Math.hypot(g.x - b.x, g.y - b.y) <= SPELL_POWER.swamp.r + b.type.r) sp *= SPELL_POWER.swamp.slow;
       }
-      const arrive = g.target === this.boss ? this.boss.r + 6 : 6;
-      if (d < arrive) {
-        if (g.target === this.boss) {
-          // Troops reaching the boss head chip its health.
-          this.boss.hp -= g.count * this.civs[g.owner].stats.attack;
-        } else if (g.target) this.resolveArrival(g);
-        g.done = true;
-      } else {
-        g.x += dx / d * sp * dt;
-        g.y += dy / d * sp * dt;
+      const isBoss = g.target === this.boss;
+      const txp = isBoss ? this.boss.x : g.tx, typ = isBoss ? this.boss.y : g.ty;
+      const arriveR = isBoss ? this.boss.r + 6 : Math.max(10, (g.target?.type?.r || 20) * 0.8);
+      const arrived = [];
+      for (const s of g.soldiers) {
+        const ddx = txp - s.x, ddy = typ - s.y;
+        const dist = Math.hypot(ddx, ddy) || 1;
+        if (dist < arriveR) { arrived.push(s); continue; }
+        let dirx, diry;
+        if (s.pos === 0) {
+          dirx = ddx / dist; diry = ddy / dist;
+        } else if (s.dispT > 0) {
+          dirx = s.fx; diry = s.fy;
+          s.dispT -= dt;
+          if (dist <= 75) s.dispT = 0;
+          s.lx = s.x - g.sx; // lateral offset from the source building, frozen when dispersion ends
+          s.ly = s.y - g.sy;
+        } else {
+          let aimX = txp, aimY = typ;
+          if (dist > 75) { aimX = txp + s.lx; aimY = typ + s.ly; }
+          const ax = aimX - s.x, ay = aimY - s.y;
+          const ad = Math.hypot(ax, ay) || 1;
+          dirx = ax / ad; diry = ay / ad;
+        }
+        s.x += dirx * sp * dt;
+        s.y += diry * sp * dt;
       }
+      for (const s of arrived) {
+        g.soldiers.splice(g.soldiers.indexOf(s), 1);
+        g.count -= s.pop;
+        if (isBoss) {
+          this.boss.hp -= s.pop * this.civs[g.owner].stats.attack;
+        } else if (g.target) {
+          this.resolveArrival({ owner: g.owner, unitKey: g.unitKey, count: s.pop, target: g.target });
+        }
+      }
+      if (!g.soldiers.length) { g.done = true; continue; }
+      // Squad anchor = centroid, used by towers/spells/labels.
+      let cx = 0, cy = 0;
+      for (const s of g.soldiers) { cx += s.x; cy += s.y; }
+      g.x = cx / g.soldiers.length;
+      g.y = cy / g.soldiers.length;
     }
-    this.groups = this.groups.filter(g => !g.done);
+    this.groups = this.groups.filter(g => !g.done && g.count > 0);
 
     // Spell effects.
     for (const e of this.effects) {
