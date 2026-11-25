@@ -1,8 +1,7 @@
 // Service worker: precaches the whole game so it plays fully offline (incl. iPhone home-screen app).
 // All paths are relative to this script's scope so subdirectory hosting works.
-const CACHE = 'cwars-v5';
+const CACHE = 'cwars-v6';
 const FILES = [
-  '.',
   'assets/img/b/house1_none.png',
   'assets/img/b/house1_race1.png',
   'assets/img/b/house1_race2.png',
@@ -305,10 +304,19 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(hit => hit || fetch(e.request).then(r => {
-      const copy = r.clone();
-      caches.open(CACHE).then(c => c.put(e.request, copy));
-      return r;
-    }))
+    caches.open(CACHE).then(c => c.match(e.request, {ignoreSearch: true})).then(hit => {
+      if (hit) return hit;
+      return fetch(e.request).then(r => {
+        const copy = r.clone();
+        caches.open(CACHE).then(cc => cc.put(e.request, copy));
+        return r;
+      }).catch(err => {
+        // Offline navigation to the root/directory URL: serve the cached index.
+        if (e.request.mode === 'navigate') {
+          return caches.open(CACHE).then(cc => cc.match('index.html')).then(m => m || Promise.reject(err));
+        }
+        throw err;
+      });
+    })
   );
 });

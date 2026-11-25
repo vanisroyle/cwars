@@ -79,12 +79,15 @@ export class Input {
     const target = this.game.buildingAt(p.x, p.y, 12)
       || (boss && boss.hp > 0 && Math.hypot(p.x - boss.x, p.y - boss.y) <= boss.r + 14 ? boss : null);
     if (target && this.selected.size) {
+      let sent = 0;
       for (const b of this.selected) {
-        if (b !== target) this.game.sendTroops(b, target, OWNER.PLAYER);
+        if (b !== target && this.game.sendTroops(b, target, OWNER.PLAYER)) sent++;
       }
-      const tutWasActive = TUT.active;
-      TUT.notifySend();
-      if (tutWasActive && !TUT.active) this.onTutEnd && this.onTutEnd();
+      if (sent > 0) {
+        const tutWasActive = TUT.active;
+        TUT.notifySend();
+        if (tutWasActive && !TUT.active) this.onTutEnd && this.onTutEnd();
+      }
     }
     this.selected.clear();
   }
