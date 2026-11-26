@@ -373,7 +373,7 @@ export class Game {
       if (b.send) {
         b.send.t -= dt;
         if (b.send.t <= 0) {
-          b.send.t = SEND_INTERVAL[b.type.kind] || 0.44;
+          b.send.t += SEND_INTERVAL[b.type.kind] || 0.44;
           this.sendWave(b);
         }
       }
@@ -391,7 +391,7 @@ export class Game {
       if (b.owner >= 0 && b.type.kind === 'tower' && b.pop >= 1) {
         b.fireT -= dt;
         if (b.fireT <= 0) {
-          b.fireT = b.type.fireRate;
+          b.fireT += b.type.fireRate;
           const tgt = this.groups.find(g => g.owner !== b.owner && Math.hypot(g.x - b.x, g.y - b.y) <= b.type.range);
           if (tgt) {
             this.arrows.push({ x: b.x, y: b.y - b.type.r, tx: tgt.x, ty: tgt.y, t: 0, life: 0.22, dmg: Math.min(TOWER_MAX_HIT, b.pop * TOWER_DAMAGE_PER_POP * this.civs[b.owner].stats.attack), target: tgt });
@@ -480,7 +480,7 @@ export class Game {
       if (e.kind === 'storm') {
         e.boltT -= dt;
         if (e.boltT <= 0 && e.bolts > 0) {
-          e.boltT = SPELL_POWER.lightning.interval;
+          e.boltT += SPELL_POWER.lightning.interval;
           e.bolts--;
           const bx = e.x + (Math.random() - .5) * 2 * e.r, by = e.y + (Math.random() - .5) * 2 * e.r;
           this.aoeDamage(bx, by, 26, e.dmg, e.owner, { vsUnits: true, destroyBuildings: true });
@@ -534,7 +534,7 @@ export class Game {
       } else {
         gl.attackT -= dt;
         if (gl.attackT <= 0) {
-          gl.attackT = 1.5;
+          gl.attackT += 1.5;
           gl.target.pop = Math.max(0, gl.target.pop - gl.dmg);
           this.flash(gl.target.x, gl.target.y - gl.target.type.r, '#a98');
         }
