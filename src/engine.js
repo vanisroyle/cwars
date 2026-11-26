@@ -18,6 +18,7 @@ export function effectiveStats(civBase, statRanks) {
 
 export class Game {
   constructor(level, playerCivStats, playerStatRanks, playerSpellRanks, raceOf, hardMode = false) {
+    this.hardMode = hardMode;
     this.level = level;
     this.levelIdx = level.index;
     this.raceOf = raceOf || ((o) => Math.min(o + 1, 4));
@@ -308,7 +309,8 @@ export class Game {
     if (!mine.length) return;
 
     // Occasionally cast a spell on a player cluster.
-    if (civ.crystals > SPELLS.fireball.cost * 1.6 && Math.random() < 0.18) {
+    const spellChance = this.hardMode ? 0.18 : 0.08;
+    if (civ.crystals > SPELLS.fireball.cost * 1.6 && Math.random() < spellChance) {
       const target = this.buildings.filter(b => b.owner === OWNER.PLAYER).sort((a, b) => b.pop - a.pop)[0];
       if (target) {
         const key = Math.random() < 0.5 ? 'fireball' : 'meteorite';
@@ -325,7 +327,9 @@ export class Game {
     // Choose targets: weak neutrals first, then weak enemy buildings.
     const enemies = this.buildings.filter(b => b.owner !== civ.id);
     if (!enemies.length) return;
-    const aggression = 0.35 + Math.min(0.4, this.time / 300);
+    const aggression = this.hardMode
+      ? 0.35 + Math.min(0.4, this.time / 300)
+      : 0.22 + Math.min(0.25, this.time / 500);
     if (Math.random() > aggression) return;
 
     const scored = enemies.map(b => {
@@ -341,7 +345,7 @@ export class Game {
     // Send from enough buildings to plausibly win: 1-3 nearest senders.
     const senders = mine
       .sort((a, b) => Math.hypot(a.x - target.x, a.y - target.y) - Math.hypot(b.x - target.x, b.y - target.y))
-      .slice(0, target.owner === -1 ? 1 : 3)
+      .slice(0, target.owner === -1 ? 1 : (this.hardMode ? 3 : 2))
       .filter(m => m.pop > target.pop * 0.4 || mine.length === 1);
     let force = 0;
     const defRatio = this.civs[civ.id].stats.attack / this.defPower(target);

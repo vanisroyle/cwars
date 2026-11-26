@@ -78,7 +78,7 @@ function startLevel(idx) {
     input.disarmSpell();
   }
   buildSpellbar();
-  if (idx === 0 && !save.tutorialDone) TUT.start(); else TUT.finish();
+  if (idx === 0) TUT.start(); else TUT.finish();
   if (input) input.onTutEnd = () => { save.tutorialDone = 1; persist(); };
   $('hud-level').textContent = LEVELS[idx].name;
   show(null);
