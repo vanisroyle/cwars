@@ -40,8 +40,8 @@ export function preload(decorCids) {
   for (const g of ['g1', 'g2', 'g3', 'g4']) files.push(`terrain/${g}.jpg`);
   for (const o of ['o2711', 'o2720', 'o2722', 'o2733', 'o2735', 'o2741', 'o2743', 'river1', 'river2'])
     files.push(`terrain/${o}.png`);
-  for (const o of ['river1', 'river4', 'river7', 'river10', 'river13', 'river16', 'river19', 'river22',
-    'lake1', 'lake3', 'lake5', 'lake7', 'lake9', 'lake11', 'lake13', 'lake15',
+  for (const o of [...Array.from({ length: 24 }, (_, i) => `river${i + 1}`),
+    ...Array.from({ length: 15 }, (_, i) => `lake${i + 1}`),
     's2712', 's2721', 's2723', 's2736', 's2737', 's2738', 's2739', 's2740', 's2742'])
     files.push(`water/${o}.png`);
   for (const [cid, ext] of decorCids) files.push(`d/${cid}.${ext}`);
