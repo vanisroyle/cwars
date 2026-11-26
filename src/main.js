@@ -312,12 +312,22 @@ $('btn-result-menu').addEventListener('click', () => { game = null; showTitle();
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && inGame()) disarmSpell(); });
 
 // ---------- Main loop ----------
+// Original Flash runs at a fixed 25fps; step logic in exact 40ms quanta so
+// movement and animation cadence match the SWF instead of gliding at display rate.
+const STEP = 1 / 25;
+let acc = 0;
 function frame(t) {
   requestAnimationFrame(frame);
-  const dt = Math.min(0.05, (t - lastT) / 1000 || 0.016);
+  const dt = Math.min(0.1, (t - lastT) / 1000 || STEP);
   lastT = t;
   if (game && inGame() && !game.over) {
-    game.update(dt);
+    acc += dt;
+    let guard = 0;
+    while (acc >= STEP && !game.over) {
+      game.update(STEP);
+      acc -= STEP;
+      if (++guard >= 8) { acc = 0; break; }
+    }
     refreshSpellbar();
     if (game.over) showResult(game.result === 'win');
   }
