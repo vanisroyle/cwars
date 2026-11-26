@@ -590,7 +590,11 @@ export class Game {
     const playerAlive = alive.has(OWNER.PLAYER);
     // A living boss keeps the enemy side alive — original requires killing the head.
     const enemiesAlive = [...alive].some(id => id !== OWNER.PLAYER) || (this.boss && this.boss.hp > 0);
-    if (!playerAlive) { this.over = true; this.result = 'lose'; }
-    else if (!enemiesAlive) { this.over = true; this.result = 'win'; }
+    // Grace period: never end a level in its first moments — a start-of-level
+    // edge case must not bounce the player straight out of the battle.
+    if (this.time > 2) {
+      if (!playerAlive) { this.over = true; this.result = 'lose'; }
+      else if (!enemiesAlive) { this.over = true; this.result = 'win'; }
+    }
   }
 }

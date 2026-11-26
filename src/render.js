@@ -1,7 +1,7 @@
 // Canvas renderer: terrain, buildings, armies, spells, boss.
 import { OWNER, NEUTRAL_COLOR } from './data.js';
 import { DECOR, DBND, TERRAIN, WATER, WATER_OFF, RIVER_FRAMES, LAKE_FRAMES } from './decor.js';
-import { IMGS, buildingImg, unitImg, UNI_SHEETS, bossImg, decorImg } from './assets.js';
+import { IMGS, buildingImg, unitImg, bossImg, decorImg } from './assets.js';
 
 const W = 960, H = 600;
 const K = 1.2; // stage 800x500 -> canvas 960x600
@@ -99,20 +99,21 @@ function drawBuilding(c, b, civs, sel, raceOf) {
 function drawGroup(c, g, civs, raceOf, gameTime) {
   const col = civs[g.owner].color;
   const raceIdx = raceOf(g.owner);
-  const img = unitImg(raceIdx);
-  const sheet = UNI_SHEETS[raceIdx];
   const su = g.unitKey === 'heavy' ? 34 : g.unitKey === 'cavalry' ? 30 : 26;
   // Each soldier is its own entity marching on its own track (original WarAttack model).
   const list = g.soldiers && g.soldiers.length ? g.soldiers : [{ x: g.x, y: g.y, pos: 0 }];
   let flag = null;
   for (let i = 0; i < list.length; i++) {
     const s = list[i];
-    if (s.pos === 0 && !flag) flag = s;
+    const isFlag = s.pos === 0;
+    if (isFlag && !flag) flag = s;
+    const img = unitImg(raceIdx, g.unitKey, isFlag);
     const left = g.tx - s.x < 0;
-    if (img && img.width && sheet) {
-      const [nf, fw, fh] = sheet;
-      // 25fps walk cycle like the original, offset phase per soldier.
-      const f = ((gameTime * 25 + i * 7) | 0) % nf;
+    if (img && img.width) {
+      // Original cadence: the shared walk loop advances one pose every 6 timeline
+      // frames at 25fps — 4 poses per soldier type, roughly one stride per second.
+      const fw = img.width / 4, fh = img.height;
+      const f = ((gameTime * 25 / 6) | 0) % 4;
       const sc = su / fh, w = fw * sc, h = fh * sc;
       c.save();
       c.translate(s.x, s.y);

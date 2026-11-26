@@ -51,6 +51,10 @@ let game = null, input = null, armedSpell = null, lastT = 0, levelIndex = 0;
 
 function playerStats() { return effectiveStats(CIVS[save.civ].stats, save.stats); }
 
+window.addEventListener('error', (e) => {
+  try { localStorage.setItem('cwars_last_error', String(e.message || e.error)); } catch (_) {}
+});
+
 function startLevel(idx) {
   levelIndex = idx;
   const lv = { ...LEVELS[idx], index: idx };
