@@ -99,7 +99,6 @@ function drawBuilding(c, b, civs, sel, raceOf) {
 function drawGroup(c, g, civs, raceOf, gameTime) {
   const col = civs[g.owner].color;
   const raceIdx = raceOf(g.owner);
-  const su = g.unitKey === 'heavy' ? 34 : g.unitKey === 'cavalry' ? 30 : 26;
   // Each soldier is its own entity marching on its own track (original WarAttack model).
   const list = g.soldiers && g.soldiers.length ? g.soldiers : [{ x: g.x, y: g.y, pos: 0 }];
   let flag = null;
@@ -114,7 +113,7 @@ function drawGroup(c, g, civs, raceOf, gameTime) {
       // frames at 25fps — 4 poses per soldier type, roughly one stride per second.
       const fw = img.width / 4, fh = img.height;
       const f = ((gameTime * 25 / 6) | 0) % 4;
-      const sc = su / fh, w = fw * sc, h = fh * sc;
+      const w = fw, h = fh;
       c.save();
       c.translate(s.x, s.y);
       if (left) c.scale(-1, 1);
@@ -149,10 +148,12 @@ export function render(ctx, game, ui) {
     const img = IMGS[`water/${key}.png`];
     if (!img || !img.width) continue;
     const off = WATER_OFF[kind] || [0, 0];
+    // Animated frames are stored at half resolution to save decode memory; upscale 2x.
+    const zs = (kind === 'river' || kind === 'lake') ? 2 : 1;
     ctx.save();
     ctx.translate(wx * K, wy * K);
     if (flip) ctx.scale(-1, 1);
-    ctx.drawImage(img, off[0] * K, off[1] * K, img.width * K, img.height * K);
+    ctx.drawImage(img, off[0] * K, off[1] * K, img.width * zs * K, img.height * zs * K);
     ctx.restore();
   }
 
