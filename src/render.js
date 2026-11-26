@@ -271,6 +271,10 @@ export function render(ctx, game, ui) {
       ctx.strokeStyle = pt.color; ctx.globalAlpha = 1 - p; ctx.lineWidth = 3;
       ctx.beginPath(); ctx.arc(pt.x, pt.y, 10 + p * 30, 0, 7); ctx.stroke();
       ctx.globalAlpha = 1;
+    } else if (pt.kind === 'hit') {
+      ctx.strokeStyle = '#ffca7a'; ctx.lineWidth = 2; ctx.globalAlpha = 1 - p;
+      ctx.beginPath(); ctx.arc(pt.x, pt.y, 3 + p * 12, 0, 7); ctx.stroke();
+      ctx.globalAlpha = 1;
     } else if (pt.kind === 'bolt') {
       ctx.strokeStyle = '#cfe8ff'; ctx.lineWidth = 3; ctx.globalAlpha = 1 - p;
       ctx.beginPath(); ctx.moveTo(pt.x - 4, pt.y - 40); ctx.lineTo(pt.x, pt.y); ctx.lineTo(pt.x + 4, pt.y - 20); ctx.stroke();

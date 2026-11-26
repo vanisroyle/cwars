@@ -26,9 +26,9 @@ export const BUILDING_TYPES = {
   shrine1: { kind: 'shrine', level: 1, unit: 'cavalry',  def: 1, soft: 20,  hard: 30,  r: 19 },
   shrine2: { kind: 'shrine', level: 2, unit: 'cavalry',  def: 1, soft: 40,  hard: 60,  r: 23 },
   shrine3: { kind: 'shrine', level: 3, unit: 'cavalry',  def: 1, soft: 60,  hard: 90,  r: 27 },
-  tower1:  { kind: 'tower',  level: 1, unit: 'heavy',    def: 2, soft: 10,  hard: 15,  r: 18, range: 360, fireRate: 0.9 },
-  tower2:  { kind: 'tower',  level: 2, unit: 'heavy',    def: 2, soft: 25,  hard: 37,  r: 22, range: 480, fireRate: 0.8 },
-  tower3:  { kind: 'tower',  level: 3, unit: 'heavy',    def: 2, soft: 50,  hard: 75,  r: 26, range: 600, fireRate: 0.7 },
+  tower1:  { kind: 'tower',  level: 1, unit: 'heavy',    def: 2, soft: 10,  hard: 15,  r: 18, range: 150, fireRate: 0.9 },
+  tower2:  { kind: 'tower',  level: 2, unit: 'heavy',    def: 2, soft: 25,  hard: 37,  r: 22, range: 200, fireRate: 0.8 },
+  tower3:  { kind: 'tower',  level: 3, unit: 'heavy',    def: 2, soft: 50,  hard: 75,  r: 26, range: 250, fireRate: 0.7 },
 };
 
 // Original regen: +1 troop every regenSec seconds per house tier (regenSec /= civ agility).

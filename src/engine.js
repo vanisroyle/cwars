@@ -412,6 +412,8 @@ export class Game {
       a.t += dt;
       if (a.t >= a.life && a.target) {
         a.target.count -= Math.ceil(a.dmg);
+        // Visible feedback so squads don't seem to vanish: small hit burst at the squad.
+        this.particles.push({ kind: 'hit', x: a.target.x, y: a.target.y - 10, t: 0, life: .3 });
         a.target = null;
       }
     }
