@@ -239,5 +239,5 @@ export const WATER_OFF = {
   s2736: [73, 100], s2737: [298, 74], s2738: [213, 155],
   s2739: [-20, 101], s2740: [2, 75], s2742: [270, 152],
 };
-export const RIVER_FRAMES = ['river1', 'river4', 'river7', 'river10', 'river13', 'river16', 'river19', 'river22'];
-export const LAKE_FRAMES = ['lake1', 'lake3', 'lake5', 'lake7', 'lake9', 'lake11', 'lake13', 'lake15'];
+export const RIVER_FRAMES = ['river1', 'river2', 'river3', 'river4', 'river5', 'river6', 'river7', 'river8', 'river9', 'river10', 'river11', 'river12', 'river13', 'river14', 'river15', 'river16', 'river17', 'river18', 'river19', 'river20', 'river21', 'river22', 'river23', 'river24'];
+export const LAKE_FRAMES = ['lake1', 'lake2', 'lake3', 'lake4', 'lake5', 'lake6', 'lake7', 'lake8', 'lake9', 'lake10', 'lake11', 'lake12', 'lake13', 'lake14', 'lake15'];

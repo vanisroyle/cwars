@@ -61,7 +61,7 @@ function startLevel(idx) {
   const playerRace = RACE_INDEX[save.civ] || 1;
   const others = [1, 2, 3].filter(r => r !== playerRace);
   const raceOf = (o) => (o === 0 ? playerRace : (o <= 2 ? others[o - 1] : 4));
-  game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells, raceOf);
+  game = new Game(lv, { ...CIVS[save.civ], stats: CIVS[save.civ].stats }, save.stats, save.spells, raceOf, save.mode === 'hard');
   window.__game = game; // debug/testing hook
   armedSpell = null;
   resetTerrain();
@@ -208,6 +208,7 @@ function buildLevels() {
     inner.appendChild(el);
   });
   $('levels-title').textContent = `Campaign — ${CIVS[save.civ].name}`;
+  refreshMode();
   // Scroll so the current level is in view (map is tall; progress runs bottom-up).
   const cur = POS[Math.max(1, save.unlocked)] || POS[1];
   requestAnimationFrame(() => {
@@ -286,6 +287,13 @@ function showResult(win) {
 
 // ---------- Wire buttons ----------
 $('btn-play').addEventListener('click', () => { buildCivCards(); show('civ'); });
+function refreshMode() {
+  if (!save.mode) save.mode = 'normal';
+  $('btn-mode-normal').classList.toggle('mode-on', save.mode === 'normal');
+  $('btn-mode-hard').classList.toggle('mode-on', save.mode === 'hard');
+}
+$('btn-mode-normal').addEventListener('click', () => { save.mode = 'normal'; persist(); refreshMode(); });
+$('btn-mode-hard').addEventListener('click', () => { save.mode = 'hard'; persist(); refreshMode(); });
 $('btn-civ-back').addEventListener('click', showTitle);
 $('btn-levels-back').addEventListener('click', showTitle);
 $('btn-upgrades').addEventListener('click', () => { buildUpgrades(); show('upgrades'); });

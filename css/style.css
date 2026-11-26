@@ -1,6 +1,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
+  touch-action: none;
   height: 100%;
   background: #1a120b;
   font-family: Georgia, 'Times New Roman', serif;
@@ -363,3 +364,6 @@ button.big { font-size: 22px; padding: 12px 40px; }
   0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.55), 0 0 0 0 rgba(255,220,120,0.7); }
   50% { box-shadow: 0 2px 8px rgba(0,0,0,0.55), 0 0 0 12px rgba(255,220,120,0); }
 }
+
+#mode-toggle button { opacity: 0.55; }
+#mode-toggle button.mode-on { opacity: 1; outline: 2px solid #8a6a20; font-weight: bold; }

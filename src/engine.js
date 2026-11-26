@@ -17,7 +17,7 @@ export function effectiveStats(civBase, statRanks) {
 }
 
 export class Game {
-  constructor(level, playerCivStats, playerStatRanks, playerSpellRanks, raceOf) {
+  constructor(level, playerCivStats, playerStatRanks, playerSpellRanks, raceOf, hardMode = false) {
     this.level = level;
     this.levelIdx = level.index;
     this.raceOf = raceOf || ((o) => Math.min(o + 1, 4));
@@ -32,8 +32,8 @@ export class Game {
     const lai = level.ai || { attack: 1.8, defense: 1.8, agility: 1.8, speed: 1.8, crystalInit: 20 };
     for (let i = 1; i <= aiCount; i++) {
       const st = { ...AI_STATS };
-      // Original normal mode dampens enemy stats: stat -> int + frac/1.7.
-      const damp = v => Math.floor(v) + (v - Math.floor(v)) / 1.7;
+      // Original: normal mode dampens enemy stats (int + frac/1.7); hard mode uses them full.
+      const damp = v => hardMode ? v : Math.floor(v) + (v - Math.floor(v)) / 1.7;
       st.attack *= damp(lai.attack); st.defense *= damp(lai.defense);
       st.agility *= damp(lai.agility); st.speed *= damp(lai.speed);
       st.crystalInit = Math.min(st.crystalMax, lai.crystalInit);
