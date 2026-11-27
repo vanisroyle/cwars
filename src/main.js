@@ -43,6 +43,11 @@ function show(name) {
   for (const s of SCREENS) $(`screen-${s}`).classList.toggle('hidden', s !== name);
   $('hud').classList.toggle('hidden', name !== null);
   if (name === null) $('hud').classList.remove('hidden');
+  // Remember where we are: if the page reloads (mobile memory pressure kills tabs),
+  // boot restores the same screen instead of dumping the player at the title.
+  // Pause/result reloads restore into the level or the map, not the menu chain.
+  const rec = name === null ? 'game' : name === 'pause' ? 'game' : name === 'result' ? 'levels' : name;
+  try { sessionStorage.setItem('cwars_screen', rec); } catch (_) {}
 }
 function inGame() { return SCREENS.every(s => $(`screen-${s}`).classList.contains('hidden')); }
 
@@ -56,6 +61,7 @@ window.addEventListener('error', (e) => {
 });
 
 function startLevel(idx) {
+  try { sessionStorage.setItem('cwars_level', String(idx)); } catch (_) {}
   levelIndex = idx;
   const lv = { ...LEVELS[idx], index: idx };
   const playerRace = RACE_INDEX[save.civ] || 1;
@@ -346,5 +352,17 @@ if (!save.spells.fireball) { save.spells.fireball = 1; save.spells.shield = 1; p
 // Preload extracted sprites, then boot the menus.
 const decorFiles = [];
 for (const k in DECOR) for (const [cid] of DECOR[k]) decorFiles.push([cid, 'png']);
-preload(decorFiles).then(() => { showTitle(); });
+preload(decorFiles).then(() => {
+  let where = null;
+  try { where = sessionStorage.getItem('cwars_screen'); } catch (_) {}
+  if (where === 'game') {
+    const idx = parseInt(sessionStorage.getItem('cwars_level') || '0', 10);
+    if (idx >= 0 && idx < LEVELS.length) { startLevel(idx); return; }
+  } else if (where === 'levels') {
+    buildLevels(); show('levels'); return;
+  } else if (where === 'civ') {
+    buildCivCards(); show('civ'); return;
+  }
+  showTitle();
+});
 requestAnimationFrame(frame);
