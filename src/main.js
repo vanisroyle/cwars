@@ -362,6 +362,10 @@ preload(decorFiles).then(() => {
     buildLevels(); show('levels'); return;
   } else if (where === 'civ') {
     buildCivCards(); show('civ'); return;
+  } else if (where === 'upgrades') {
+    buildUpgrades(); show('upgrades'); return;
+  } else if (where === 'help') {
+    show('help'); return;
   }
   showTitle();
 });

@@ -94,9 +94,15 @@ export const sfx = {
   music(name) {
     try {
       if (this._m) { this._m.pause(); this._m = null; }
+      this._mname = name || null;
       if (!name || !this.enabled) return;
       const a = new Audio(`assets/snd/${SND[name]}`);
-      a.loop = true; a.volume = 0.35; a.play().catch(() => {});
+      a.loop = true; a.volume = 0.35;
+      a.play().catch(() => {
+        // Autoplay blocked (e.g. after a reload with no gesture yet): retry on first touch/click.
+        const retry = () => { if (this._m === a) a.play().catch(() => {}); };
+        window.addEventListener('pointerdown', retry, { once: true });
+      });
       this._m = a;
     } catch (e) { /* noop */ }
   },
